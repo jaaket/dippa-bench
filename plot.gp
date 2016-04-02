@@ -1,4 +1,3 @@
-#set terminal pdf color font "Lato,12" linewidth 4 dashed
 set terminal pdf color font "Lato,11" linewidth 4 dashed
 
 set pointsize 1
@@ -19,4 +18,4 @@ set datafile separator ','
 
 set key outside autotitle columnhead
 set offsets 0.1, 0.1, 0.1, 0.1
-plot "test.csv" using 1:2 with linespoints, "" using 1:3 with linespoints
+plot "test2.csv" using 1:2 with linespoints, "" using 1:3 with linespoints

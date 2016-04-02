@@ -29,3 +29,6 @@ executable bench
                      , statistics
                      , cassava
                      , freer
+                     , Chart
+                     , Chart-cairo
+                     , colour
