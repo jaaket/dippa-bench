@@ -1,22 +1,16 @@
 {-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE DeriveFoldable    #-}
-{-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators     #-}
 
 module Main where
 
-import           Control.Arrow                          (second, (&&&))
-import qualified           Control.Monad.State as State
+import           Control.Arrow                          ((&&&))
 import           Criterion
-import           Criterion.Types                        (Report (..),
-                                                         SampleAnalysis (..))
+import           Criterion.Types                        (Report)
 import qualified Data.Binary                            as Bin
 import qualified Data.ByteString.Lazy                   as B
-import qualified Data.Colour.SRGB                       as Colour
 import           Data.List                              (find)
 import           Data.Maybe                             (maybeToList)
 import           Data.Monoid                            ((<>))
@@ -25,27 +19,12 @@ import           GHC.Generics                           (Generic)
 import           Graphics.Rendering.Chart.Backend.Cairo
 import           Graphics.Rendering.Chart.Easy
 import qualified Options.Generic                        as Opts
-import           Statistics.Resampling.Bootstrap        (Estimate (..))
 
+import           Bench
 import qualified Freer
 import qualified Mtl
+import           Plot
 
-
-data Bench a = Bench {
-      benchDescription :: T.Text
-    , benchData        :: [(Double, a)]
-    }
-    deriving (Functor, Generic, Show, Foldable, Traversable)
-
-data BenchGroup a = BenchGroup {
-      bgDescription :: T.Text
-    , bgBenches     :: [Bench a]
-    , bgXAxisName   :: T.Text
-    }
-    deriving (Functor, Generic, Show, Foldable, Traversable)
-
-instance Bin.Binary a => Bin.Binary (Bench a)
-instance Bin.Binary a => Bin.Binary (BenchGroup a)
 
 steps :: Num a => a -> a -> Int -> [a]
 steps _ _ 0 = []
@@ -66,84 +45,46 @@ benchmarks = [
         bgDescription = "readers above state"
       , bgBenches = (\n ->
           [
-            Bench "mtl" (zip [1..8] [
+            Bench "mtl" (zip [1..5] [
                   whnf Mtl.readersAboveState1 n
                 , whnf Mtl.readersAboveState2 n
                 , whnf Mtl.readersAboveState3 n
                 , whnf Mtl.readersAboveState4 n
                 , whnf Mtl.readersAboveState5 n
-                , whnf Mtl.readersAboveState6 n
-                , whnf Mtl.readersAboveState7 n
-                , whnf Mtl.readersAboveState8 n
                 ])
-          , Bench "freer" (zip [1..8] [
+          , Bench "freer" (zip [1..5] [
                 whnf Freer.readersAboveState1 n
               , whnf Freer.readersAboveState2 n
               , whnf Freer.readersAboveState3 n
               , whnf Freer.readersAboveState4 n
               , whnf Freer.readersAboveState5 n
-              , whnf Freer.readersAboveState6 n
-              , whnf Freer.readersAboveState7 n
-              , whnf Freer.readersAboveState8 n
               ])
           ]) (10^6)
       , bgXAxisName = "# of Reader layers above State"
       }
+
+      , BenchGroup {
+          bgDescription = "readers below state"
+        , bgBenches = (\n ->
+            [
+              Bench "mtl" (zip [1..5] [
+                    whnf Mtl.readersBelowState1 n
+                  , whnf Mtl.readersBelowState2 n
+                  , whnf Mtl.readersBelowState3 n
+                  , whnf Mtl.readersBelowState4 n
+                  , whnf Mtl.readersBelowState5 n
+                  ])
+            , Bench "freer" (zip [1..5] [
+                  whnf Freer.readersBelowState1 n
+                , whnf Freer.readersBelowState2 n
+                , whnf Freer.readersBelowState3 n
+                , whnf Freer.readersBelowState4 n
+                , whnf Freer.readersBelowState5 n
+                ])
+            ]) (10^6)
+        , bgXAxisName = "# of Reader layers below State"
+        }
     ]
-
-runBenchGroup :: BenchGroup Benchmarkable -> IO (BenchGroup Report)
-runBenchGroup group = do
-    putStrLn ("Benchmarking: " <> T.unpack (bgDescription group))
-    mapM benchmark' group
-
-getMean :: Report -> Double
-getMean = estPoint . anMean . reportAnalysis
-
-getPoints :: Bench Report -> [(Double, Double)]
-getPoints = map (second getMean) . benchData
-
-data Cycle a = Cycle { cycleValues :: [a], cycleCurrent :: Int }
-
-newCycle :: [a] -> Cycle a
-newCycle values = Cycle values 0
-
-getCycleValue :: State.MonadState (Cycle a) m => m a
-getCycleValue = do
-    cycle <- State.get
-    let next = cycleCurrent cycle + 1 `mod` length (cycleValues cycle)
-    State.put (cycle { cycleCurrent = next })
-    return (cycleValues cycle !! cycleCurrent cycle)
-
-plotBench bench = do
-    style <- getCycleValue
-    return $ plot_points_values .~ getPoints bench
-           $ plot_points_title .~ title
-           $ plot_points_style .~ style
-           $ def
-  where
-    title = T.unpack (benchDescription bench)
-
-plotBenchGroup group = toRenderable layout
-  where
-    plots = State.evalState (mapM plotBench (bgBenches group)) (newCycle styles)
-
-    xAxisName = T.unpack (bgXAxisName group)
-
-    layout = layout_margin .~ 20
-           $ layout_title .~ T.unpack (bgDescription group)
-           $ layout_plots .~ map toPlot plots
-           $ layout_x_axis . laxis_title .~ xAxisName
-           $ layout_y_axis . laxis_title .~ "time (s)"
-           $ def
-
-    styles = map ($ point_radius .~ 5 $ def) [
-          (point_color .~ opaque (Colour.sRGB24read "e41a1c")) .
-          (point_shape .~ PointShapeCircle)
-        , (point_color .~ opaque (Colour.sRGB24read "377eb8")) .
-          (point_shape .~ PointShapePolygon 4 False)
-        , (point_color .~ opaque (Colour.sRGB24read "4daf4a")) .
-          (point_shape .~ PointShapePolygon 4 True)
-        ]
 
 data Options =
       Run {

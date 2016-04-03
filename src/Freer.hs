@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE DataKinds #-}
 
 module Freer where
 
@@ -25,37 +26,66 @@ innerComputation n = foldM f 1 [n,n-1..1] where
                             return $! max acc x
     f acc x = return $! max acc x
 
-wrapReader m = runReader m 0
-wrapReader2 = wrapReader . wrapReader
-wrapReader3 = wrapReader . wrapReader2
-wrapReader4 = wrapReader . wrapReader3
-wrapReader5 = wrapReader . wrapReader4
-wrapReader6 = wrapReader . wrapReader5
-wrapReader7 = wrapReader . wrapReader6
-wrapReader8 = wrapReader . wrapReader7
+-- Just be explicit for clarity:
 
-readersAboveState t = run . flip runState 0 . t . innerComputation
+readersAboveState1 =
+    run .
+    flip runState (0 :: Int) .
+    flip runReader 0 .
+    innerComputation
+readersAboveState2 =
+    run .
+    flip runState (0 :: Int) .
+    flip runReader 0 . flip runReader 0 .
+    innerComputation
+readersAboveState3 =
+    run .
+    flip runState (0 :: Int) .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    innerComputation
+readersAboveState4 =
+    run .
+    flip runState (0 :: Int) .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    innerComputation
+readersAboveState5 =
+    run .
+    flip runState (0 :: Int) .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    innerComputation
 
-readersAboveState1 :: Int -> (Int, Int)
-readersAboveState1 = readersAboveState wrapReader
+-- This will enter an infinite loop for some reason.
+-- Maybe the library has a hard time finding the state?
+--
+-- readersBelowState1 :: Int -> (Int, Int)
+-- readersBelowState1 =
+--     run .
+--     flip runReader 0 .
+--     flip runState 0 .
+--     innerComputation
 
-readersAboveState2 :: Int -> (Int, Int)
-readersAboveState2 = readersAboveState wrapReader2
-
-readersAboveState3 :: Int -> (Int, Int)
-readersAboveState3 = readersAboveState wrapReader3
-
-readersAboveState4 :: Int -> (Int, Int)
-readersAboveState4 = readersAboveState wrapReader4
-
-readersAboveState5 :: Int -> (Int, Int)
-readersAboveState5 = readersAboveState wrapReader5
-
-readersAboveState6 :: Int -> (Int, Int)
-readersAboveState6 = readersAboveState wrapReader6
-
-readersAboveState7 :: Int -> (Int, Int)
-readersAboveState7 = readersAboveState wrapReader7
-
-readersAboveState8 :: Int -> (Int, Int)
-readersAboveState8 = readersAboveState wrapReader8
+readersBelowState1 =
+    run .
+    flip runReader 0 .
+    flip runState (0 :: Int) .
+    innerComputation
+readersBelowState2 =
+    run .
+    flip runReader 0 . flip runReader 0 .
+    flip runState (0 :: Int) .
+    innerComputation
+readersBelowState3 =
+    run .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runState (0 :: Int) .
+    innerComputation
+readersBelowState4 =
+    run .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runState (0 :: Int) .
+    innerComputation
+readersBelowState5 =
+    run .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runState (0 :: Int) .
+    innerComputation

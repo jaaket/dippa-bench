@@ -15,15 +15,6 @@ countdown = evalState go
             then return x
             else put (x - 1) >> go
 
-wrapReader m = runReaderT m 0
-wrapReader2 = wrapReader . wrapReader
-wrapReader3 = wrapReader . wrapReader2
-wrapReader4 = wrapReader . wrapReader3
-wrapReader5 = wrapReader . wrapReader4
-wrapReader6 = wrapReader . wrapReader5
-wrapReader7 = wrapReader . wrapReader6
-wrapReader8 = wrapReader . wrapReader7
-
 innerComputation :: MonadState Int m => Int -> m Int
 innerComputation n = foldM f 1 [1..n] where
     f acc x | x `mod` 5 == 0 = do
@@ -32,13 +23,44 @@ innerComputation n = foldM f 1 [1..n] where
                             return $! max acc x
     f acc x = return $! max acc x
 
-readersAboveState t = flip runState 0 . t . innerComputation
+readersAboveState1 =
+    flip runState 0 .
+    flip runReaderT 0 .
+    innerComputation
+readersAboveState2 =
+    flip runState 0 .
+    flip runReaderT 0 . flip runReaderT 0 .
+    innerComputation
+readersAboveState3 =
+    flip runState 0 .
+    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    innerComputation
+readersAboveState4 =
+    flip runState 0 .
+    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    innerComputation
+readersAboveState5 =
+    flip runState 0 .
+    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    innerComputation
 
-readersAboveState1 = readersAboveState wrapReader
-readersAboveState2 = readersAboveState wrapReader2
-readersAboveState3 = readersAboveState wrapReader3
-readersAboveState4 = readersAboveState wrapReader4
-readersAboveState5 = readersAboveState wrapReader5
-readersAboveState6 = readersAboveState wrapReader6
-readersAboveState7 = readersAboveState wrapReader7
-readersAboveState8 = readersAboveState wrapReader8
+readersBelowState1 =
+    flip runReader 0 .
+    flip runStateT 0 .
+    innerComputation
+readersBelowState2 =
+    flip runReader 0 . flip runReaderT 0 .
+    flip runStateT 0 .
+    innerComputation
+readersBelowState3 =
+    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runStateT 0 .
+    innerComputation
+readersBelowState4 =
+    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runStateT 0 .
+    innerComputation
+readersBelowState5 =
+    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runStateT 0 .
+    innerComputation
