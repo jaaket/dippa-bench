@@ -2,6 +2,7 @@
 
 module Mtl where
 
+import           Control.Monad.Except
 import           Control.Monad.Reader
 import           Control.Monad.State
 
@@ -64,3 +65,9 @@ readersBelowState5 =
     flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
     flip runStateT 0 .
     innerComputation
+
+exception :: Int -> Either Int Int
+exception n = foldM f 1 (replicate n 1 ++ [0])
+  where
+    f _ x | x == 0 = throwError 0
+    f acc x = return $! acc * x

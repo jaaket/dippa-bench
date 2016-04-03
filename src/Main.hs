@@ -84,6 +84,16 @@ benchmarks = [
             ]) (10^6)
         , bgXAxisName = "# of Reader layers below State"
         }
+
+        , let numIters = steps (10^7 :: Int) (10^6) 5 in
+          BenchGroup {
+            bgDescription = "exception"
+          , bgBenches = map (\(name, benchmark) ->
+                  Bench name (map (fromIntegral &&& whnf benchmark) numIters)
+                )
+                [("freer", Freer.exception), ("mtl", Mtl.exception)]
+          , bgXAxisName = "# of iterations"
+          }
     ]
 
 data Options =

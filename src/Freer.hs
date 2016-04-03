@@ -5,6 +5,7 @@ module Freer where
 
 import           Control.Monad (foldM)
 import           Control.Monad.Freer
+import           Control.Monad.Freer.Exception
 import           Control.Monad.Freer.Reader
 import           Control.Monad.Freer.State
 
@@ -89,3 +90,9 @@ readersBelowState5 =
     flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
     flip runState (0 :: Int) .
     innerComputation
+
+exception :: Int -> Either Int Int
+exception n = run $ runError $ foldM f 1 (replicate n 1 ++ [0])
+  where
+    f _ x | x == 0 = throwError (0 :: Int)
+    f acc x = return $! acc * x
