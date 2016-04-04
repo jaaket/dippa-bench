@@ -18,6 +18,7 @@ executable bench
   other-modules:       Bench
                      , Freer.Countdown
                      , Freer.Exception
+                     , Freer.NQueens
                      , Freer.State
                      , Mtl.Countdown
                      , Mtl.Exception
