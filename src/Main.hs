@@ -21,8 +21,12 @@ import           Graphics.Rendering.Chart.Easy
 import qualified Options.Generic                        as Opts
 
 import           Bench
-import qualified Freer
-import qualified Mtl
+import qualified Freer.Countdown                        as Freer
+import qualified Freer.Exception                        as Freer
+import qualified Freer.State                            as Freer
+import qualified Mtl.Countdown                          as Mtl
+import qualified Mtl.Exception                          as Mtl
+import qualified Mtl.State                              as Mtl
 import           Plot
 
 
@@ -85,15 +89,15 @@ benchmarks = [
         , bgXAxisName = "# of Reader layers below State"
         }
 
-        , let numIters = steps (10^7 :: Int) (10^6) 5 in
-          BenchGroup {
-            bgDescription = "exception"
-          , bgBenches = map (\(name, benchmark) ->
-                  Bench name (map (fromIntegral &&& whnf benchmark) numIters)
-                )
-                [("freer", Freer.exception), ("mtl", Mtl.exception)]
-          , bgXAxisName = "# of iterations"
-          }
+      , let numIters = steps (10^7 :: Int) (10^6) 5 in
+        BenchGroup {
+          bgDescription = "exception"
+        , bgBenches = map (\(name, benchmark) ->
+                Bench name (map (fromIntegral &&& whnf benchmark) numIters)
+              )
+              [("freer", Freer.exception), ("mtl", Mtl.exception)]
+        , bgXAxisName = "# of iterations"
+        }
     ]
 
 data Options =

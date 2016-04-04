@@ -15,7 +15,14 @@ cabal-version:       >=1.10
 executable bench
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:       Bench, Freer, Mtl, Plot
+  other-modules:       Bench
+                     , Freer.Countdown
+                     , Freer.Exception
+                     , Freer.State
+                     , Mtl.Countdown
+                     , Mtl.Exception
+                     , Mtl.State
+                     , Plot
   default-language:    Haskell2010
   ghc-options:         -W -O2
   build-depends:       base >= 4.7 && < 5
