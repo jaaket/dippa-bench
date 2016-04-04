@@ -19,11 +19,20 @@ runNondet = handleRelay
     (return . return)
     (\(Choose choices) k -> msum <$> mapM k choices)
 
-test :: Member (Nondet Int) r => Eff r (Int, Int)
-test = do
-    x <- choose [1,2,3]
-    y <- choose [4,5]
-    return (x, y)
+noAttack :: (Int, Int) -> (Int, Int) -> Bool
+noAttack (x, y) (x', y') =
+    x /= x' && y /= y' && abs (x - x') /= abs (y - y')
 
-runTest :: [(Int, Int)]
-runTest = run (runNondet (test :: Eff (Nondet Int ': r) (Int, Int)))
+safePositionsOnColumn :: Int -> Int -> [(Int, Int)] -> [Int]
+safePositionsOnColumn n col qs =
+    [ x | x <- [1..n], all (noAttack (x, col)) qs ]
+
+addQueens :: Member (Nondet Int) r => Int -> Int -> [(Int, Int)] -> Eff r [(Int, Int)]
+addQueens _ 0 qs = return qs
+addQueens n col qs = do
+    row <- choose (safePositionsOnColumn n col qs)
+    addQueens n (col - 1) ((row, col) : qs)
+
+nQueens :: MonadPlus m => Int -> m [(Int, Int)]
+nQueens n =
+    run (runNondet (addQueens n n [] :: Eff (Nondet Int ': r) [(Int, Int)]))
