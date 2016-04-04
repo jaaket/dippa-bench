@@ -23,9 +23,11 @@ import qualified Options.Generic                        as Opts
 import           Bench
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
+import qualified Freer.NQueens                          as Freer
 import qualified Freer.State                            as Freer
 import qualified Mtl.Countdown                          as Mtl
 import qualified Mtl.Exception                          as Mtl
+import qualified Mtl.NQueens                            as Mtl
 import qualified Mtl.State                              as Mtl
 import           Plot
 
@@ -37,12 +39,12 @@ steps low stepSize n = low : steps (low + stepSize) stepSize (n - 1)
 benchmarks = [
       let numIters = steps (10^7 :: Int) (10^6) 5 in
       BenchGroup {
-        bgDescription = "countdown"
-      , bgBenches = map (\(name, benchmark) ->
-              Bench name (map (fromIntegral &&& whnf benchmark) numIters)
-            )
-            [("freer", Freer.countdown), ("mtl", Mtl.countdown)]
-      , bgXAxisName = "# of iterations"
+            bgDescription = "countdown"
+          , bgBenches = map (\(name, benchmark) ->
+                  Bench name (map (fromIntegral &&& whnf benchmark) numIters)
+                )
+                [("freer", Freer.countdown), ("mtl", Mtl.countdown)]
+          , bgXAxisName = "# of iterations"
       }
 
     , BenchGroup {
@@ -67,7 +69,7 @@ benchmarks = [
       , bgXAxisName = "# of Reader layers above State"
       }
 
-      , BenchGroup {
+    , BenchGroup {
           bgDescription = "readers below state"
         , bgBenches = (\n ->
             [
@@ -89,14 +91,23 @@ benchmarks = [
         , bgXAxisName = "# of Reader layers below State"
         }
 
-      , let numIters = steps (10^7 :: Int) (10^6) 5 in
-        BenchGroup {
+    , let numIters = steps (10^7 :: Int) (10^6) 5 in
+      BenchGroup {
           bgDescription = "exception"
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
               [("freer", Freer.exception), ("mtl", Mtl.exception)]
         , bgXAxisName = "# of iterations"
+        }
+
+    , BenchGroup {
+          bgDescription = "n-queens"
+        , bgBenches = map (\(name, benchmark) ->
+                Bench name (map (fromIntegral &&& whnf benchmark) [6..10])
+              )
+              [("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
+        , bgXAxisName = "n"
         }
     ]
 
