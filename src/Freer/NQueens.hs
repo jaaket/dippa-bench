@@ -8,6 +8,9 @@ module Freer.NQueens where
 import Control.Monad (msum, MonadPlus)
 import Control.Monad.Freer.Internal
 
+import Common.NQueens
+
+
 data Nondet a x where
     Choose :: [a] -> Nondet a a
 
@@ -18,14 +21,6 @@ runNondet :: MonadPlus m => Eff (Nondet a ': r) w -> Eff r (m w)
 runNondet = handleRelay
     (return . return)
     (\(Choose choices) k -> msum <$> mapM k choices)
-
-noAttack :: (Int, Int) -> (Int, Int) -> Bool
-noAttack (x, y) (x', y') =
-    x /= x' && y /= y' && abs (x - x') /= abs (y - y')
-
-safePositionsOnColumn :: Int -> Int -> [(Int, Int)] -> [Int]
-safePositionsOnColumn n col qs =
-    [ x | x <- [1..n], all (noAttack (x, col)) qs ]
 
 addQueens :: Member (Nondet Int) r => Int -> Int -> [(Int, Int)] -> Eff r [(Int, Int)]
 addQueens _ 0 qs = return qs

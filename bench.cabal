@@ -16,12 +16,14 @@ executable bench
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Bench
+                     , Common.NQueens
                      , Freer.Countdown
                      , Freer.Exception
                      , Freer.NQueens
                      , Freer.State
                      , Mtl.Countdown
                      , Mtl.Exception
+                     , Mtl.NQueens
                      , Mtl.State
                      , Plot
   default-language:    Haskell2010
@@ -40,3 +42,4 @@ executable bench
                      , Chart
                      , Chart-cairo
                      , colour
+                     , nondeterminism
