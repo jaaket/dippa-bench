@@ -20,8 +20,10 @@ addQueens n col qs = do
 
 instance Monad m => Alternative (ContT [r] m) where
     empty = ContT $ const (return [])
-    (ContT f) <|> (ContT g) = ContT $ \k ->
-        f k >>= \xs -> g k >>= \ys -> return (xs ++ ys)
+    (ContT f) <|> (ContT g) = ContT $ \k -> do
+        xs <- f k
+        ys <- g k
+        return (xs ++ ys)
 
 instance Monad m => MonadPlus (ContT [r] m)
 
