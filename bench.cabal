@@ -16,6 +16,7 @@ executable bench
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Bench
+                     , Classes.Countdown
                      , Common.NQueens
                      , Effects.Countdown
                      , Effects.NQueens
@@ -51,3 +52,4 @@ executable bench
                      , effects
                      , extensible-effects
                      , containers
+                     , monad-classes

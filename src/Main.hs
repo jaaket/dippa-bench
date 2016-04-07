@@ -21,6 +21,7 @@ import           Graphics.Rendering.Chart.Easy
 import qualified Options.Generic                        as Opts
 
 import           Bench
+import qualified Classes.Countdown                      as Classes
 import qualified Effects.Countdown                      as Effects
 import qualified Effects.NQueens                        as Effects
 import qualified Extensible.Countdown                   as Extensible
@@ -49,7 +50,11 @@ benchmarks = [
           , bgBenches = map (\(name, benchmark) ->
                   Bench name (map (fromIntegral &&& whnf benchmark) numIters)
                 )
-                [("effects", Effects.countdown), ("extensible-effects", Extensible.countdown), ("freer", Freer.countdown), ("mtl", Mtl.countdown)]
+                [ ("classes", Classes.countdown)
+                , ("effects", Effects.countdown)
+                , ("extensible-effects", Extensible.countdown)
+                , ("freer", Freer.countdown)
+                , ("mtl", Mtl.countdown)]
           , bgXAxisName = "# of iterations"
       }
 
