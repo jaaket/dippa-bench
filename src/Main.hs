@@ -129,14 +129,6 @@ benchmarks = [
               [("effects", Effects.nQueens), ("extensible-effects", Extensible.nQueens), ("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
         , bgXAxisName = "n"
         }
-
-    , BenchGroup {
-          bgDescription = "reader"
-        , bgBenches = [
-              Bench "mtl" (map (fromIntegral &&& whnf Mtl.readerCountdown) (steps (10^6) (10^6) 5))
-            ]
-        , bgXAxisName = "n"
-        }
     ]
 
 data Options =

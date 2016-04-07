@@ -30,7 +30,6 @@ executable bench
                      , Mtl.Countdown
                      , Mtl.Exception
                      , Mtl.NQueens
-                     , Mtl.Reader
                      , Mtl.State
                      , Plot
   default-language:    Haskell2010
