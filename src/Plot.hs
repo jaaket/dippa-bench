@@ -60,4 +60,8 @@ plotBenchGroup group = toRenderable layout
           (point_shape .~ PointShapePolygon 4 False)
         , (point_color .~ opaque (Colour.sRGB24read "4daf4a")) .
           (point_shape .~ PointShapePolygon 4 True)
+        , (point_color .~ opaque (Colour.sRGB24read "984ea3")) .
+          (point_shape .~ PointShapePolygon 3 False)
+        , (point_color .~ opaque (Colour.sRGB24read "ff7f00")) .
+          (point_shape .~ PointShapePolygon 3 True)
         ]
