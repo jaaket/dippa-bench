@@ -28,6 +28,6 @@ addQueens n col qs = do
     row <- choose (safePositionsOnColumn n col qs)
     addQueens n (col - 1) ((row, col) : qs)
 
-nQueens :: MonadPlus m => Int -> m [(Int, Int)]
+nQueens :: Int -> [[(Int, Int)]]
 nQueens n =
     run (runNondet (addQueens n n [] :: Eff (Nondet Int ': r) [(Int, Int)]))

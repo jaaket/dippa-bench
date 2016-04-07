@@ -17,6 +17,8 @@ executable bench
   main-is:             Main.hs
   other-modules:       Bench
                      , Common.NQueens
+                     , Effects.Countdown
+                     , Effects.NQueens
                      , Freer.Countdown
                      , Freer.Exception
                      , Freer.NQueens
@@ -24,6 +26,7 @@ executable bench
                      , Mtl.Countdown
                      , Mtl.Exception
                      , Mtl.NQueens
+                     , Mtl.Reader
                      , Mtl.State
                      , Plot
   default-language:    Haskell2010
@@ -42,3 +45,6 @@ executable bench
                      , Chart
                      , Chart-cairo
                      , colour
+                     , effects
+                     , extensible-effects
+                     , containers

@@ -21,6 +21,8 @@ import           Graphics.Rendering.Chart.Easy
 import qualified Options.Generic                        as Opts
 
 import           Bench
+import qualified Effects.Countdown                      as Effects
+import qualified Effects.NQueens                        as Effects
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
@@ -37,13 +39,13 @@ steps _ _ 0 = []
 steps low stepSize n = low : steps (low + stepSize) stepSize (n - 1)
 
 benchmarks = [
-      let numIters = steps (10^7 :: Int) (10^6) 5 in
+      let numIters = steps (10^6) (10^6) 5 in
       BenchGroup {
             bgDescription = "countdown"
           , bgBenches = map (\(name, benchmark) ->
                   Bench name (map (fromIntegral &&& whnf benchmark) numIters)
                 )
-                [("freer", Freer.countdown), ("mtl", Mtl.countdown)]
+                [("effects", Effects.countdown), ("freer", Freer.countdown), ("mtl", Mtl.countdown)]
           , bgXAxisName = "# of iterations"
       }
 
@@ -106,7 +108,7 @@ benchmarks = [
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) [6..10])
               )
-              [("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
+              [("effects", Effects.nQueens), ("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
         , bgXAxisName = "n"
         }
     ]
