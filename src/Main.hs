@@ -22,6 +22,8 @@ import qualified Options.Generic                        as Opts
 
 import           Bench
 import qualified Classes.Countdown                      as Classes
+import qualified Classes.Exception                      as Classes
+import qualified Classes.State                          as Classes
 import qualified Effects.Countdown                      as Effects
 import qualified Effects.NQueens                        as Effects
 import qualified Extensible.Countdown                   as Extensible
@@ -83,6 +85,13 @@ benchmarks = [
               , whnf Extensible.readersAboveState4 n
               , whnf Extensible.readersAboveState5 n
               ])
+          , Bench "classes" (zip [1..5] [
+                whnf Classes.readersAboveState1 n
+              , whnf Classes.readersAboveState2 n
+              , whnf Classes.readersAboveState3 n
+              , whnf Classes.readersAboveState4 n
+              , whnf Classes.readersAboveState5 n
+              ])
           ]) (10^6)
       , bgXAxisName = "# of Reader layers above State"
       }
@@ -112,6 +121,13 @@ benchmarks = [
                 , whnf Extensible.readersBelowState4 n
                 , whnf Extensible.readersBelowState5 n
                 ])
+            , Bench "classes" (zip [1..5] [
+                  whnf Classes.readersBelowState1 n
+                , whnf Classes.readersBelowState2 n
+                , whnf Classes.readersBelowState3 n
+                , whnf Classes.readersBelowState4 n
+                , whnf Classes.readersBelowState5 n
+                ])
             ]) (10^6)
         , bgXAxisName = "# of Reader layers below State"
         }
@@ -122,7 +138,10 @@ benchmarks = [
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
-              [("extensible-effects", Extensible.exception), ("freer", Freer.exception), ("mtl", Mtl.exception)]
+              [ ("classes", Classes.exception)
+              , ("extensible-effects", Extensible.exception)
+              , ("freer", Freer.exception)
+              , ("mtl", Mtl.exception)]
         , bgXAxisName = "# of iterations"
         }
 

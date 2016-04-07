@@ -17,6 +17,8 @@ executable bench
   main-is:             Main.hs
   other-modules:       Bench
                      , Classes.Countdown
+                     , Classes.Exception
+                     , Classes.State
                      , Common.NQueens
                      , Effects.Countdown
                      , Effects.NQueens
