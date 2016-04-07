@@ -7,12 +7,12 @@
 module Main where
 
 import           Control.Arrow                          ((&&&))
+import           Control.Monad                          (when)
 import           Criterion
 import           Criterion.Types                        (Report)
 import qualified Data.Binary                            as Bin
 import qualified Data.ByteString.Lazy                   as B
-import           Data.List                              (find)
-import           Data.Maybe                             (maybeToList)
+import           Data.Maybe                             (fromMaybe)
 import           Data.Monoid                            ((<>))
 import qualified Data.Text                              as T
 import           GHC.Generics                           (Generic)
@@ -24,6 +24,9 @@ import           Bench
 import qualified Effects.Countdown                      as Effects
 import qualified Effects.NQueens                        as Effects
 import qualified Extensible.Countdown                   as Extensible
+import qualified Extensible.Exception                   as Extensible
+import qualified Extensible.NQueens                     as Extensible
+import qualified Extensible.State                       as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
@@ -68,6 +71,13 @@ benchmarks = [
               , whnf Freer.readersAboveState4 n
               , whnf Freer.readersAboveState5 n
               ])
+          , Bench "extensible-effects" (zip [1..5] [
+                whnf Extensible.readersAboveState1 n
+              , whnf Extensible.readersAboveState2 n
+              , whnf Extensible.readersAboveState3 n
+              , whnf Extensible.readersAboveState4 n
+              , whnf Extensible.readersAboveState5 n
+              ])
           ]) (10^6)
       , bgXAxisName = "# of Reader layers above State"
       }
@@ -90,17 +100,24 @@ benchmarks = [
                 , whnf Freer.readersBelowState4 n
                 , whnf Freer.readersBelowState5 n
                 ])
+            , Bench "extensible-effects" (zip [1..5] [
+                  whnf Extensible.readersBelowState1 n
+                , whnf Extensible.readersBelowState2 n
+                , whnf Extensible.readersBelowState3 n
+                , whnf Extensible.readersBelowState4 n
+                , whnf Extensible.readersBelowState5 n
+                ])
             ]) (10^6)
         , bgXAxisName = "# of Reader layers below State"
         }
 
-    , let numIters = steps (10^7 :: Int) (10^6) 5 in
+    , let numIters = steps (10^6) (10^6) 5 in
       BenchGroup {
           bgDescription = "exception"
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
-              [("freer", Freer.exception), ("mtl", Mtl.exception)]
+              [("extensible-effects", Extensible.exception), ("freer", Freer.exception), ("mtl", Mtl.exception)]
         , bgXAxisName = "# of iterations"
         }
 
@@ -109,15 +126,24 @@ benchmarks = [
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) [6..10])
               )
-              [("effects", Effects.nQueens), ("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
+              [("effects", Effects.nQueens), ("extensible-effects", Extensible.nQueens), ("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
+        , bgXAxisName = "n"
+        }
+
+    , BenchGroup {
+          bgDescription = "reader"
+        , bgBenches = [
+              Bench "mtl" (map (fromIntegral &&& whnf Mtl.readerCountdown) (steps (10^6) (10^6) 5))
+            ]
         , bgXAxisName = "n"
         }
     ]
 
 data Options =
       Run {
-          single :: Maybe T.Text
-        , save   :: Maybe FilePath
+          bench    :: [T.Text]
+        , save     :: Bool
+        , savePath :: Maybe FilePath
         }
     | Plot FilePath
     deriving (Generic, Show)
@@ -128,15 +154,13 @@ main :: IO ()
 main = do
     opts <- Opts.getRecord "Benchmarking" :: IO Options
     case opts of
-        Run mSingle mSave -> do
-            let toBenchmark = case mSingle of
-                                Just name -> maybeToList $ find ((== name) . bgDescription) benchmarks
-                                Nothing -> benchmarks
+        Run benches save mSavePath -> do
+            let toBenchmark = filter ((`elem` benches) . bgDescription) benchmarks
             results <- mapM runBenchGroup toBenchmark
 
-            case mSave of
-                Just filename -> B.writeFile filename (Bin.encode results)
-                Nothing -> return ()
+            when save $
+                let filename = fromMaybe "results.bin" mSavePath in
+                    B.writeFile filename (Bin.encode results)
 
         Main.Plot path -> do
             file <- B.readFile path

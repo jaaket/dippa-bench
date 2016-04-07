@@ -22,7 +22,7 @@ runNondet = handleRelay
     (return . return)
     (\(Choose choices) k -> msum <$> mapM k choices)
 
-addQueens :: Member (Nondet Int) r => Int -> Int -> [(Int, Int)] -> Eff r [(Int, Int)]
+addQueens :: Member (Nondet Int) r => Int -> Int -> [(Int, Int)] -> Eff r [(Int, Int)] -- optional
 addQueens _ 0 qs = return qs
 addQueens n col qs = do
     row <- choose (safePositionsOnColumn n col qs)
