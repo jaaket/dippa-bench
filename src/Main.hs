@@ -23,6 +23,7 @@ import qualified Options.Generic                        as Opts
 import           Bench
 import qualified Effects.Countdown                      as Effects
 import qualified Effects.NQueens                        as Effects
+import qualified Extensible.Countdown                   as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
@@ -45,7 +46,7 @@ benchmarks = [
           , bgBenches = map (\(name, benchmark) ->
                   Bench name (map (fromIntegral &&& whnf benchmark) numIters)
                 )
-                [("effects", Effects.countdown), ("freer", Freer.countdown), ("mtl", Mtl.countdown)]
+                [("effects", Effects.countdown), ("extensible-effects", Extensible.countdown), ("freer", Freer.countdown), ("mtl", Mtl.countdown)]
           , bgXAxisName = "# of iterations"
       }
 

@@ -19,6 +19,7 @@ executable bench
                      , Common.NQueens
                      , Effects.Countdown
                      , Effects.NQueens
+                     , Extensible.Countdown
                      , Freer.Countdown
                      , Freer.Exception
                      , Freer.NQueens
