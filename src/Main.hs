@@ -234,13 +234,16 @@ data Options =
 
 instance Opts.ParseRecord Options
 
+ppBenchGroup :: BenchGroup a -> String
+ppBenchGroup group = T.unpack $ bgId group <> ": " <> bgDescription group
+
 main :: IO ()
 main = do
     opts <- Opts.getRecord "Benchmarking" :: IO Options
     case opts of
         List -> do
             putStrLn "Available benchmarks:"
-            mapM_ (\group -> putStrLn $ T.unpack $ bgId group <> ": " <> bgDescription group) benchmarks
+            mapM_ (putStrLn . ppBenchGroup) benchmarks
 
         Run benches save mSavePath -> do
             let toBenchmark = filter ((`elem` benches) . bgId) benchmarks
@@ -254,9 +257,10 @@ main = do
             file <- B.readFile path
             let results = Bin.decode file :: [BenchGroup Report]
             mapM_ (\group -> do
-                putStrLn $ "plot: " <> T.unpack (bgDescription group)
+                let filename = T.unpack (bgId group) <> ".pdf"
+                putStrLn $ "plot: " <> T.unpack (bgDescription group) <> ": " <> filename
                 renderableToFile
                     (def & fo_format .~ PDF)
-                    (T.unpack (bgId group) <> ".pdf")
+                    filename
                     (plotBenchGroup group)
                 ) results
