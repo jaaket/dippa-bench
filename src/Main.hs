@@ -23,12 +23,14 @@ import qualified Options.Generic                        as Opts
 import           Bench
 import qualified Classes.Countdown                      as Classes
 import qualified Classes.Exception                      as Classes
+import qualified Classes.Reader                         as Classes
 import qualified Classes.State                          as Classes
 import qualified Effects.Countdown                      as Effects
 import qualified Effects.NQueens                        as Effects
 import qualified Extensible.Countdown                   as Extensible
 import qualified Extensible.Exception                   as Extensible
 import qualified Extensible.NQueens                     as Extensible
+import qualified Extensible.Reader                      as Extensible
 import qualified Extensible.State                       as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
@@ -37,6 +39,7 @@ import qualified Freer.State                            as Freer
 import qualified Mtl.Countdown                          as Mtl
 import qualified Mtl.Exception                          as Mtl
 import qualified Mtl.NQueens                            as Mtl
+import qualified Mtl.Reader                             as Mtl
 import qualified Mtl.State                              as Mtl
 import           Plot
 
@@ -152,6 +155,20 @@ benchmarks = [
               )
               [("effects", Effects.nQueens), ("extensible-effects", Extensible.nQueens), ("freer", Freer.nQueens), ("mtl", Mtl.nQueens)]
         , bgXAxisName = "n"
+        }
+
+    , let numIters = steps (10^6) (10^6) 5 in
+      BenchGroup {
+          bgDescription = "countdownReader"
+        , bgBenches = map (\(name, benchmark) ->
+                Bench name (map (fromIntegral &&& whnf benchmark) numIters)
+              )
+              [
+                ("classes", Classes.countdownReader)
+              , ("extensible-effects", Extensible.countdownReader)
+              , ("mtl", Mtl.countdownReader)
+              ]
+        , bgXAxisName = "# of iterations"
         }
     ]
 
