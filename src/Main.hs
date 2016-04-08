@@ -28,6 +28,7 @@ import qualified Classes.Countdown                      as Classes
 import qualified Classes.Exception                      as Classes
 import qualified Classes.Reader                         as Classes
 import qualified Classes.State                          as Classes
+import qualified Classes.StateWriter                    as Classes
 import qualified Classes.Writer                         as Classes
 import qualified Effects.Countdown                      as Effects
 import qualified Effects.NQueens                        as Effects
@@ -203,6 +204,19 @@ benchmarks = [
               , ("extensible-effects", Extensible.repeatedTell)
               , ("freer", Freer.repeatedTell)
               , ("mtl", Mtl.repeatedTell)
+              ]
+        , bgXAxisName = "# of iterations"
+        }
+
+    , let numIters = steps (10^5) (10^5) 5 in
+      BenchGroup {
+          bgId = "was"
+        , bgDescription = "countdown + writer, writer above state"
+        , bgBenches = map (\(name, benchmark) ->
+                Bench name (map (fromIntegral &&& nf benchmark) numIters)
+              )
+              [
+                ("classes", Classes.countdownWriterAbove)
               ]
         , bgXAxisName = "# of iterations"
         }

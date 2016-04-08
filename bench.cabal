@@ -20,6 +20,7 @@ executable bench
                      , Classes.Exception
                      , Classes.Reader
                      , Classes.State
+                     , Classes.StateWriter
                      , Classes.Writer
                      , Common.NQueens
                      , Effects.Countdown
