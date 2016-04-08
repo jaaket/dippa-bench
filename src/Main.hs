@@ -37,6 +37,7 @@ import qualified Extensible.Exception                   as Extensible
 import qualified Extensible.NQueens                     as Extensible
 import qualified Extensible.Reader                      as Extensible
 import qualified Extensible.State                       as Extensible
+import qualified Extensible.StateWriter                 as Extensible
 import qualified Extensible.Writer                      as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
@@ -217,6 +218,7 @@ benchmarks = [
               )
               [
                 ("classes", Classes.countdownWriterAbove)
+              , ("extensible-effects", Extensible.countdownWriterAbove)
               ]
         , bgXAxisName = "# of iterations"
         }
