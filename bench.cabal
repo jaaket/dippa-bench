@@ -33,6 +33,7 @@ executable bench
                      , Freer.Countdown
                      , Freer.Exception
                      , Freer.NQueens
+                     , Freer.Reader
                      , Freer.State
                      , Freer.Writer
                      , Mtl.Countdown
@@ -62,3 +63,5 @@ executable bench
                      , extensible-effects
                      , containers
                      , monad-classes
+                     , data-default
+                     , lens

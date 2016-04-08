@@ -7,17 +7,20 @@
 module Main where
 
 import           Control.Arrow                          ((&&&))
+import           Control.Lens                           ((&), (.~))
 import           Control.Monad                          (when)
 import           Criterion
 import           Criterion.Types                        (Report)
 import qualified Data.Binary                            as Bin
 import qualified Data.ByteString.Lazy                   as B
+import           Data.Default                           (def)
 import           Data.Maybe                             (fromMaybe)
 import           Data.Monoid                            ((<>))
 import qualified Data.Text                              as T
 import           GHC.Generics                           (Generic)
-import           Graphics.Rendering.Chart.Backend.Cairo
-import           Graphics.Rendering.Chart.Easy
+import           Graphics.Rendering.Chart.Backend.Cairo (FileFormat (..),
+                                                         fo_format,
+                                                         renderableToFile)
 import qualified Options.Generic                        as Opts
 
 import           Bench
@@ -37,6 +40,7 @@ import qualified Extensible.Writer                      as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
+import qualified Freer.Reader                           as Freer
 import qualified Freer.State                            as Freer
 import qualified Freer.Writer                           as Freer
 import qualified Mtl.Countdown                          as Mtl
@@ -55,7 +59,8 @@ steps low stepSize n = low : steps (low + stepSize) stepSize (n - 1)
 benchmarks = [
       let numIters = steps (10^6) (10^6) 5 in
       BenchGroup {
-            bgDescription = "countdown"
+            bgId = "cd"
+          , bgDescription = "countdown"
           , bgBenches = map (\(name, benchmark) ->
                   Bench name (map (fromIntegral &&& whnf benchmark) numIters)
                 )
@@ -68,7 +73,8 @@ benchmarks = [
       }
 
     , BenchGroup {
-        bgDescription = "readers above state"
+        bgId = "ras"
+      , bgDescription = "readers above state"
       , bgBenches = (\n ->
           [
             Bench "mtl" (zip [1..5] [
@@ -104,7 +110,8 @@ benchmarks = [
       }
 
     , BenchGroup {
-          bgDescription = "readers below state"
+          bgId = "rbs"
+        , bgDescription = "readers below state"
         , bgBenches = (\n ->
             [
               Bench "mtl" (zip [1..5] [
@@ -141,7 +148,8 @@ benchmarks = [
 
     , let numIters = steps (10^6) (10^6) 5 in
       BenchGroup {
-          bgDescription = "exception"
+          bgId = "exc"
+        , bgDescription = "exception"
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
@@ -153,7 +161,8 @@ benchmarks = [
         }
 
     , BenchGroup {
-          bgDescription = "n-queens"
+          bgId = "nq"
+        , bgDescription = "n-queens"
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& nf benchmark) [6..10])
               )
@@ -168,13 +177,15 @@ benchmarks = [
 
     , let numIters = steps (10^6) (10^6) 5 in
       BenchGroup {
-          bgDescription = "countdownReader"
+          bgId = "cdr"
+        , bgDescription = "countdownReader"
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
               [
                 ("classes", Classes.countdownReader)
               , ("extensible-effects", Extensible.countdownReader)
+              , ("freer", Freer.countdownReader)
               , ("mtl", Mtl.countdownReader)
               ]
         , bgXAxisName = "# of iterations"
@@ -182,14 +193,15 @@ benchmarks = [
 
     , let numIters = steps (10^5) (10^5) 5 in
       BenchGroup {
-          bgDescription = "repeatedTell"
+          bgId = "rt"
+        , bgDescription = "repeatedTell"
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& nf benchmark) numIters)
               )
               [
                 ("classes", Classes.repeatedTell)
               , ("extensible-effects", Extensible.repeatedTell)
-              , ("Freer", Freer.repeatedTell)
+              , ("freer", Freer.repeatedTell)
               , ("mtl", Mtl.repeatedTell)
               ]
         , bgXAxisName = "# of iterations"
@@ -197,7 +209,8 @@ benchmarks = [
     ]
 
 data Options =
-      Run {
+      List
+    | Run {
           bench    :: [T.Text]
         , save     :: Bool
         , savePath :: Maybe FilePath
@@ -211,8 +224,12 @@ main :: IO ()
 main = do
     opts <- Opts.getRecord "Benchmarking" :: IO Options
     case opts of
+        List -> do
+            putStrLn "Available benchmarks:"
+            mapM_ (\group -> putStrLn $ T.unpack $ bgId group <> ": " <> bgDescription group) benchmarks
+
         Run benches save mSavePath -> do
-            let toBenchmark = filter ((`elem` benches) . bgDescription) benchmarks
+            let toBenchmark = filter ((`elem` benches) . bgId) benchmarks
             results <- mapM runBenchGroup toBenchmark
 
             when save $
@@ -226,6 +243,6 @@ main = do
                 putStrLn $ "plot: " <> T.unpack (bgDescription group)
                 renderableToFile
                     (def & fo_format .~ PDF)
-                    (T.unpack (bgDescription group) <> ".pdf")
+                    (T.unpack (bgId group) <> ".pdf")
                     (plotBenchGroup group)
                 ) results

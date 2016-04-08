@@ -21,7 +21,8 @@ data Bench a = Bench {
     deriving (Functor, Generic, Show, Foldable, Traversable)
 
 data BenchGroup a = BenchGroup {
-      bgDescription :: T.Text
+      bgId          :: T.Text
+    , bgDescription :: T.Text
     , bgBenches     :: [Bench a]
     , bgXAxisName   :: T.Text
     }
