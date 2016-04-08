@@ -20,6 +20,7 @@ executable bench
                      , Classes.Exception
                      , Classes.Reader
                      , Classes.State
+                     , Classes.Writer
                      , Common.NQueens
                      , Effects.Countdown
                      , Effects.NQueens
@@ -28,15 +29,18 @@ executable bench
                      , Extensible.NQueens
                      , Extensible.Reader
                      , Extensible.State
+                     , Extensible.Writer
                      , Freer.Countdown
                      , Freer.Exception
                      , Freer.NQueens
                      , Freer.State
+                     , Freer.Writer
                      , Mtl.Countdown
                      , Mtl.Exception
                      , Mtl.NQueens
                      , Mtl.Reader
                      , Mtl.State
+                     , Mtl.Writer
                      , Plot
   default-language:    Haskell2010
   ghc-options:         -W -O2
