@@ -222,7 +222,8 @@ main = do
         Main.Plot path -> do
             file <- B.readFile path
             let results = Bin.decode file :: [BenchGroup Report]
-            mapM_ (\group ->
+            mapM_ (\group -> do
+                putStrLn $ "plot: " <> T.unpack (bgDescription group)
                 renderableToFile
                     (def & fo_format .~ PDF)
                     (T.unpack (bgDescription group) <> ".pdf")
