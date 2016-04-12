@@ -248,7 +248,9 @@ main = do
             mapM_ (putStrLn . ppBenchGroup) benchmarks
 
         Run benches save mSavePath -> do
-            let toBenchmark = filter ((`elem` benches) . bgId) benchmarks
+            let toBenchmark = if null benches
+                    then benchmarks
+                    else filter ((`elem` benches) . bgId) benchmarks
             results <- mapM runBenchGroup toBenchmark
 
             when save $
