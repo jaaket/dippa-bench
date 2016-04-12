@@ -257,7 +257,7 @@ main = do
                 let filename = fromMaybe "results.bin" mSavePath in
                     B.writeFile filename (Bin.encode results)
 
-        Main.Plot path -> do
+        Plot path -> do
             file <- B.readFile path
             let results = Bin.decode file :: [BenchGroup Report]
             mapM_ (\group -> do
