@@ -43,6 +43,7 @@ executable bench
                      , Mtl.NQueens
                      , Mtl.Reader
                      , Mtl.State
+                     , Mtl.StateWriter
                      , Mtl.Writer
                      , Plot
   default-language:    Haskell2010

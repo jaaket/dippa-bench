@@ -52,6 +52,7 @@ import qualified Mtl.Exception                          as Mtl
 import qualified Mtl.NQueens                            as Mtl
 import qualified Mtl.Reader                             as Mtl
 import qualified Mtl.State                              as Mtl
+import qualified Mtl.StateWriter                        as Mtl
 import qualified Mtl.Writer                             as Mtl
 import           Plot
 
@@ -221,6 +222,7 @@ benchmarks = [
               [
                 ("classes", Classes.countdownWriterAbove)
               , ("extensible-effects", Extensible.countdownWriterAbove)
+              , ("mtl", Mtl.countdownWriterAbove)
               ]
         , bgXAxisName = "# of iterations"
         }
