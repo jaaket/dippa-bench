@@ -14,6 +14,8 @@ import           Criterion.Types                        (Report)
 import qualified Data.Binary                            as Bin
 import qualified Data.ByteString.Lazy                   as B
 import           Data.Default                           (def)
+import           Data.Function                          (on)
+import           Data.List                              (nub, sort, sortBy)
 import           Data.Maybe                             (fromMaybe)
 import           Data.Monoid                            ((<>))
 import qualified Data.Text                              as T
@@ -239,6 +241,45 @@ instance Opts.ParseRecord Options
 ppBenchGroup :: BenchGroup a -> String
 ppBenchGroup group = T.unpack $ bgId group <> ": " <> bgDescription group
 
+aboutToBenchDescription :: [BenchGroup a] -> T.Text
+aboutToBenchDescription bgs =
+       "I'm about to benchmark:\n"
+    <> headerIndent <> T.intercalate "\t" header <> "\n"
+    <> T.intercalate "\n" (map rowText rows)
+  where
+    headerIndent :: T.Text
+    headerIndent = T.replicate numTabs "\t"
+      where
+        numTabs = maximum (map T.length allFrameworks) `div` 8 + 1
+
+    bgsSortedById = sortBy (compare `on` bgId) bgs
+
+    header :: [T.Text] -- Benchmark group ids
+    header = map bgId bgsSortedById
+
+    rowText :: (T.Text, [Bool]) -> T.Text
+    rowText (title, benchPresentList) =
+           title <> T.replicate indent "\t"
+        <> T.intercalate "\t" (map displayBool benchPresentList)
+      where
+        indent = T.length headerIndent - (T.length title `div` 8)
+
+    rows :: [(T.Text, [Bool])]
+    rows = map (id &&& benchesPresent) allFrameworks
+
+    benchesPresent :: T.Text -> [Bool]
+    benchesPresent fwName = map (elem fwName . fwsInBench) bgsSortedById
+      where
+        fwsInBench = map benchDescription . bgBenches
+
+    allFrameworks :: [T.Text]
+    allFrameworks =
+        sort (nub (map benchDescription (concatMap bgBenches bgs)))
+
+    displayBool :: Bool -> T.Text
+    displayBool False = " "
+    displayBool True = "✓"
+
 main :: IO ()
 main = do
     opts <- Opts.getRecord "Benchmarking" :: IO Options
@@ -251,6 +292,10 @@ main = do
             let toBenchmark = if null benches
                     then benchmarks
                     else filter ((`elem` benches) . bgId) benchmarks
+
+            putStrLn (T.unpack $ aboutToBenchDescription toBenchmark)
+            putStrLn ""
+
             results <- mapM runBenchGroup toBenchmark
 
             when save $
