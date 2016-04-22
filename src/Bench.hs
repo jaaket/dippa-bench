@@ -33,5 +33,6 @@ instance Bin.Binary a => Bin.Binary (BenchGroup a)
 
 runBenchGroup :: BenchGroup Benchmarkable -> IO (BenchGroup Report)
 runBenchGroup group = do
-    putStrLn ("Benchmarking: " <> T.unpack (bgDescription group))
+    putStrLn ("Benchmarking: " <> T.unpack (bgDescription group) <>
+              " (" <> T.unpack (bgId group) <> ")")
     mapM benchmark' group
