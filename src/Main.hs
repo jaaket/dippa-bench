@@ -244,25 +244,34 @@ ppBenchGroup group = T.unpack $ bgId group <> ": " <> bgDescription group
 aboutToBenchDescription :: [BenchGroup a] -> T.Text
 aboutToBenchDescription bgs =
        "I'm about to benchmark:\n"
-    <> headerIndent <> T.intercalate "\t" header <> "\n"
+    <> T.replicate headerIndentLength " "
+    <> header <> "\n"
     <> T.intercalate "\n" (map rowText rows)
   where
-    headerIndent :: T.Text
-    headerIndent = T.replicate numTabs "\t"
-      where
-        numTabs = maximum (map T.length allFrameworks) `div` 8 + 1
+    headerIndentLength :: Int
+    headerIndentLength = maximum (map T.length allFrameworks) + 1
 
     bgsSortedById = sortBy (compare `on` bgId) bgs
 
-    header :: [T.Text] -- Benchmark group ids
-    header = map bgId bgsSortedById
+    header :: T.Text
+    header = T.concat (map insertSpaceAfter headerItems)
+      where
+        insertSpaceAfter item =
+            item <> T.replicate (headerItemSpacing - T.length item) " "
+
+    headerItems :: [T.Text] -- Benchmark group ids
+    headerItems = map bgId bgsSortedById
+
+    headerItemSpacing = headerItemMaxLen + 3
+
+    headerItemMaxLen = maximum (map T.length headerItems)
 
     rowText :: (T.Text, [Bool]) -> T.Text
     rowText (title, benchPresentList) =
-           title <> T.replicate indent "\t"
-        <> T.intercalate "\t" (map displayBool benchPresentList)
+           title <> T.replicate indent " "
+        <> T.intercalate (T.replicate (headerItemSpacing - 1) " ") (map displayBool benchPresentList)
       where
-        indent = T.length headerIndent - (T.length title `div` 8)
+        indent = headerIndentLength - T.length title
 
     rows :: [(T.Text, [Bool])]
     rows = map (id &&& benchesPresent) allFrameworks
