@@ -74,7 +74,7 @@ benchmarks = [
           , bgBenches = map (\(name, benchmark) ->
                   Bench name (map (fromIntegral &&& whnf benchmark) numIters)
                 )
-                [ ("classes", Classes.countdown)
+                [ ("monad-classes", Classes.countdown)
                 , ("effects", Effects.countdown)
                 , ("extensible-effects", Extensible.countdown)
                 , ("freer", Freer.countdown)
@@ -108,7 +108,7 @@ benchmarks = [
               , whnf Extensible.readersAboveState4 n
               , whnf Extensible.readersAboveState5 n
               ])
-          , Bench "classes" (zip [1..5] [
+          , Bench "monad-classes" (zip [1..5] [
                 whnf Classes.readersAboveState1 n
               , whnf Classes.readersAboveState2 n
               , whnf Classes.readersAboveState3 n
@@ -145,7 +145,7 @@ benchmarks = [
                 , whnf Extensible.readersBelowState4 n
                 , whnf Extensible.readersBelowState5 n
                 ])
-            , Bench "classes" (zip [1..5] [
+            , Bench "monad-classes" (zip [1..5] [
                   whnf Classes.readersBelowState1 n
                 , whnf Classes.readersBelowState2 n
                 , whnf Classes.readersBelowState3 n
@@ -163,7 +163,7 @@ benchmarks = [
         , bgBenches = map (\(name, benchmark) ->
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
-              [ ("classes", Classes.exception)
+              [ ("monad-classes", Classes.exception)
               , ("extensible-effects", Extensible.exception)
               , ("freer", Freer.exception)
               , ("mtl", Mtl.exception)]
@@ -193,7 +193,7 @@ benchmarks = [
                 Bench name (map (fromIntegral &&& whnf benchmark) numIters)
               )
               [
-                ("classes", Classes.countdownReader)
+                ("monad-classes", Classes.countdownReader)
               , ("extensible-effects", Extensible.countdownReader)
               , ("freer", Freer.countdownReader)
               , ("mtl", Mtl.countdownReader)
@@ -209,7 +209,7 @@ benchmarks = [
                 Bench name (map (fromIntegral &&& nf benchmark) numIters)
               )
               [
-                ("classes", Classes.repeatedTell)
+                ("monad-classes", Classes.repeatedTell)
               , ("extensible-effects", Extensible.repeatedTell)
               , ("freer", Freer.repeatedTell)
               , ("mtl", Mtl.repeatedTell)
@@ -225,7 +225,7 @@ benchmarks = [
                 Bench name (map (fromIntegral &&& nf benchmark) numIters)
               )
               [
-                ("classes", Classes.countdownWriterAbove)
+                ("monad-classes", Classes.countdownWriterAbove)
               , ("extensible-effects", Extensible.countdownWriterAbove)
               , ("mtl", Mtl.countdownWriterAbove)
               ]
@@ -239,7 +239,7 @@ benchmarks = [
                 Bench name (map (fromIntegral &&& nf benchmark) numIters)
               )
               [
-                ("classes", Classes.countdownWriterBelow)
+                ("monad-classes", Classes.countdownWriterBelow)
               , ("extensible-effects", Extensible.countdownWriterBelow)
               , ("mtl", Mtl.countdownWriterBelow)
               ]
