@@ -10,6 +10,7 @@ import qualified Control.Monad.State                    as State
 import qualified Data.Text                              as T
 import qualified Data.Colour.SRGB                       as Colour
 import           Graphics.Rendering.Chart.Easy
+import           Graphics.Rendering.Chart.Utils (isValidNumber)
 
 import Bench
 
@@ -50,6 +51,7 @@ plotBenchGroup group = toRenderable layout
     layout = layout_title .~ T.unpack (bgDescription group)
            $ layout_plots .~ map toPlot plots
            $ layout_x_axis . laxis_title .~ xAxisName
+           $ layout_x_axis . laxis_generate .~ autoScaledPaddedAxis 0.1 def
            $ layout_y_axis . laxis_title .~ "time (s)"
            $ def
 
@@ -65,3 +67,10 @@ plotBenchGroup group = toRenderable layout
         , (point_color .~ opaque (Colour.sRGB24read "ff7f00")) .
           (point_shape .~ PointShapePolygon 3 True)
         ]
+
+    autoScaledPaddedAxis :: RealFloat a => a -> LinearAxisParams a -> AxisFn a
+    autoScaledPaddedAxis padding lap ps0 = scaledAxis lap rs ps
+      where
+        ps = filter isValidNumber ps0
+        width = maximum ps - minimum ps
+        rs = (minimum ps - padding * width, maximum ps + padding * width)
