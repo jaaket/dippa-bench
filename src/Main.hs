@@ -255,6 +255,7 @@ data Options =
     | Run {
           bench    :: [T.Text]
         , savePath :: Maybe FilePath
+        , fw       :: [T.Text]
         }
     | Plot FilePath
     deriving (Generic, Show)
@@ -334,10 +335,14 @@ main = do
             putStrLn "Available benchmarks:"
             mapM_ (putStrLn . ppBenchGroup) benchmarks
 
-        Run benches mSavePath -> do
-            let toBenchmark = if null benches
+        Run benches mSavePath fws -> do
+            let idsFiltered = if null benches
                     then benchmarks
                     else filter ((`elem` benches) . bgId) benchmarks
+
+            let toBenchmark = if null fws
+                    then idsFiltered
+                    else map (\bg -> bg { bgBenches = filter ((`elem` fws) . benchDescription) (bgBenches bg) }) idsFiltered
 
             putStrLn (T.unpack $ aboutToBenchDescription toBenchmark)
             putStrLn ""
