@@ -16,3 +16,6 @@ countdownWrite = do
 
 countdownWriterAbove :: Int -> [Int]
 countdownWriterAbove n = fst $ snd $ run $ runState n $ runMonoidWriter countdownWrite
+
+countdownWriterBelow :: Int -> [Int]
+countdownWriterBelow n = fst $ run $ runMonoidWriter $ runState n countdownWrite

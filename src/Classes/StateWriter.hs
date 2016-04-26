@@ -16,3 +16,6 @@ countdownWrite = do
 
 countdownWriterAbove :: Int -> [Int]
 countdownWriterAbove n = snd $ fst $ run $ runStateLazy n $ runWriterLazy countdownWrite
+
+countdownWriterBelow :: Int -> [Int]
+countdownWriterBelow n = snd $ run $ runWriterLazy $ evalStateLazy n countdownWrite

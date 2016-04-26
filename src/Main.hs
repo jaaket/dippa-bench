@@ -226,6 +226,20 @@ benchmarks = [
               ]
         , bgXAxisName = "# of iterations"
         }
+    , let numIters = steps (10^5) (10^5) 5 in
+      BenchGroup {
+          bgId = "wbs"
+        , bgDescription = "countdown + writer, writer below state"
+        , bgBenches = map (\(name, benchmark) ->
+                Bench name (map (fromIntegral &&& nf benchmark) numIters)
+              )
+              [
+                ("classes", Classes.countdownWriterBelow)
+              , ("extensible-effects", Extensible.countdownWriterBelow)
+              , ("mtl", Mtl.countdownWriterBelow)
+              ]
+        , bgXAxisName = "# of iterations"
+        }
     ]
 
 data Options =
