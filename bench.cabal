@@ -68,3 +68,4 @@ executable bench
                      , monad-classes
                      , data-default
                      , lens
+                     , directory

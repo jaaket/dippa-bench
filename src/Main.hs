@@ -7,6 +7,7 @@
 module Main where
 
 import           Control.Arrow                          ((&&&))
+import           Control.Exception                      (bracket)
 import           Control.Lens                           ((&), (.~))
 import           Control.Monad                          (when)
 import           Criterion
@@ -24,6 +25,10 @@ import           Graphics.Rendering.Chart.Backend.Cairo (FileFormat (..),
                                                          fo_format,
                                                          renderableToFile)
 import qualified Options.Generic                        as Opts
+import           System.Directory                       (doesFileExist)
+import           System.IO                              (BufferMode (..),
+                                                         hGetBuffering,
+                                                         hSetBuffering, stdin)
 
 import           Bench
 import qualified Classes.Countdown                      as Classes
@@ -246,7 +251,6 @@ data Options =
       List
     | Run {
           bench    :: [T.Text]
-        , save     :: Bool
         , savePath :: Maybe FilePath
         }
     | Plot FilePath
@@ -305,6 +309,20 @@ aboutToBenchDescription bgs =
     displayBool False = " "
     displayBool True = "✓"
 
+confirmSave :: FilePath -> IO Bool
+confirmSave name = bracket
+    clearAndStoreBuffering
+    (hSetBuffering stdin) $
+    \_ -> do
+        putStrLn $ "Do you want to overwrite " <> name <> "? [press y to confirm]"
+        response <- getChar
+        return (response == 'y')
+  where
+    clearAndStoreBuffering = do
+        buf <- hGetBuffering stdin
+        hSetBuffering stdin NoBuffering
+        return buf
+
 main :: IO ()
 main = do
     opts <- Opts.getRecord "Benchmarking" :: IO Options
@@ -313,7 +331,7 @@ main = do
             putStrLn "Available benchmarks:"
             mapM_ (putStrLn . ppBenchGroup) benchmarks
 
-        Run benches save mSavePath -> do
+        Run benches mSavePath -> do
             let toBenchmark = if null benches
                     then benchmarks
                     else filter ((`elem` benches) . bgId) benchmarks
@@ -321,11 +339,15 @@ main = do
             putStrLn (T.unpack $ aboutToBenchDescription toBenchmark)
             putStrLn ""
 
+            let filename = fromMaybe "results.bin" mSavePath
+            destFileExists <- doesFileExist filename
+            saveConfirmed <- if destFileExists
+                then confirmSave filename
+                else return True
+
             results <- mapM runBenchGroup toBenchmark
 
-            when save $
-                let filename = fromMaybe "results.bin" mSavePath in
-                    B.writeFile filename (Bin.encode results)
+            when saveConfirmed (B.writeFile filename (Bin.encode results))
 
         Plot path -> do
             file <- B.readFile path
