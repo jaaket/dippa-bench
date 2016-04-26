@@ -51,6 +51,7 @@ import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
 import qualified Freer.Reader                           as Freer
 import qualified Freer.State                            as Freer
+import qualified Freer.StateWriter                      as Freer
 import qualified Freer.Writer                           as Freer
 import qualified Mtl.Countdown                          as Mtl
 import qualified Mtl.Exception                          as Mtl
@@ -227,6 +228,7 @@ benchmarks = [
               [
                 ("monad-classes", Classes.countdownWriterAbove)
               , ("extensible-effects", Extensible.countdownWriterAbove)
+              , ("freer", Freer.countdownWriterAbove)
               , ("mtl", Mtl.countdownWriterAbove)
               ]
         , bgXAxisName = "# of iterations"
@@ -241,6 +243,7 @@ benchmarks = [
               [
                 ("monad-classes", Classes.countdownWriterBelow)
               , ("extensible-effects", Extensible.countdownWriterBelow)
+              , ("freer", Freer.countdownWriterBelow)
               , ("mtl", Mtl.countdownWriterBelow)
               ]
         , bgXAxisName = "# of iterations"
