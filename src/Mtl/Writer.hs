@@ -2,7 +2,7 @@
 
 module Mtl.Writer where
 
-import           Control.Monad.Writer.Lazy
+import           Control.Monad.Writer.Strict
 
 
 repeatedTell :: Int -> [Int]

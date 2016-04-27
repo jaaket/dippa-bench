@@ -2,7 +2,7 @@
 
 module Mtl.Countdown where
 
-import           Control.Monad.State
+import           Control.Monad.State.Strict
 
 
 countdown :: Int -> Int

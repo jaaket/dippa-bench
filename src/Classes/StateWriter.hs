@@ -15,7 +15,7 @@ countdownWrite = do
         else put (x - 1) >> countdownWrite
 
 countdownWriterAbove :: Int -> [Int]
-countdownWriterAbove n = snd $ fst $ run $ runStateLazy n $ runWriterLazy countdownWrite
+countdownWriterAbove n = snd $ fst $ run $ runStateStrict n $ runWriterStrict countdownWrite
 
 countdownWriterBelow :: Int -> [Int]
-countdownWriterBelow n = snd $ run $ runWriterLazy $ evalStateLazy n countdownWrite
+countdownWriterBelow n = snd $ run $ runWriterStrict $ evalStateStrict n countdownWrite

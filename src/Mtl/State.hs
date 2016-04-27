@@ -3,7 +3,7 @@
 module Mtl.State where
 
 import           Control.Monad.Reader
-import           Control.Monad.State
+import           Control.Monad.State.Strict
 
 
 innerComputation :: MonadState Int m => Int -> m Int

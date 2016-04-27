@@ -17,52 +17,52 @@ innerComputation n = foldM f 1 [1..n] where
 
 readersAboveState1 =
     run .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     runReader 0 .
     innerComputation
 readersAboveState2 =
     run .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     runReader 0 . runReader 0 .
     innerComputation
 readersAboveState3 =
     run .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     runReader 0 . runReader 0 . runReader 0 .
     innerComputation
 readersAboveState4 =
     run .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     runReader 0 . runReader 0 . runReader 0 . runReader 0 .
     innerComputation
 readersAboveState5 =
     run .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     runReader 0 . runReader 0 . runReader 0 . runReader 0 . runReader 0 .
     innerComputation
 
 readersBelowState1 =
     run .
     runReader 0 .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     innerComputation
 readersBelowState2 =
     run .
     runReader 0 . runReader 0 .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     innerComputation
 readersBelowState3 =
     run .
     runReader 0 . runReader 0 . runReader 0 .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     innerComputation
 readersBelowState4 =
     run .
     runReader 0 . runReader 0 . runReader 0 . runReader 0 .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     innerComputation
 readersBelowState5 =
     run .
     runReader 0 . runReader 0 . runReader 0 . runReader 0 . runReader 0 .
-    runStateLazy (0 :: Int) .
+    runStateStrict (0 :: Int) .
     innerComputation

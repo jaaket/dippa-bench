@@ -7,7 +7,7 @@ import           Control.Monad.Classes.Run
 
 
 countdown :: Int -> Int
-countdown n = run $ evalStateLazy n go
+countdown n = run $ evalStateStrict n go
   where
     go = do
         x <- get

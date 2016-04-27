@@ -2,8 +2,8 @@
 
 module Mtl.StateWriter where
 
-import           Control.Monad.State.Lazy
-import           Control.Monad.Writer.Lazy
+import           Control.Monad.State.Strict
+import           Control.Monad.Writer.Strict
 
 
 countdownWrite :: (MonadState Int m, MonadWriter [Int] m) => m Int
