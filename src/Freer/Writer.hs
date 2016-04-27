@@ -9,4 +9,4 @@ import           Control.Monad.Freer.Writer
 
 
 repeatedTell :: Int -> [Int]
-repeatedTell n = snd $ run $ runWriter $ replicateM_ n (tell (0 :: Int))
+repeatedTell n = snd $ run $ runWriter $ replicateM_ n (tell [0 :: Int])

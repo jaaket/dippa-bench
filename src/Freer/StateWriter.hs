@@ -6,10 +6,10 @@ import          Control.Monad.Freer
 import          Control.Monad.Freer.State
 import          Control.Monad.Freer.Writer
 
-countdownWrite :: (Member (State Int) r, Member (Writer Int) r) => Eff r Int
+countdownWrite :: (Member (State Int) r, Member (Writer [Int]) r) => Eff r Int
 countdownWrite = do
     x <- get
-    tell x
+    tell [x]
     if x == 0
         then return x
         else put (x - 1) >> countdownWrite
