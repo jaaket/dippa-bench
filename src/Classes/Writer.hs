@@ -8,4 +8,4 @@ import           Control.Monad.Classes.Run
 
 
 repeatedTell :: Int -> [Int]
-repeatedTell n = snd $ run $ runWriterStrict $ replicateM_ n (tell [0 :: Int])
+repeatedTell n = snd $ run $ runWriterLazy $ replicateM_ n (tell [0 :: Int])
