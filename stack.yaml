@@ -6,6 +6,8 @@ resolver: lts-5.9
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
+- 'haskell-chart/chart'
+- 'haskell-chart/chart-cairo'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: [optparse-generic-1.1.0, freer-0.2.2.6, effects-0.2.2, monad-classes-0.3.1.1, peano-0.1.0.1]
