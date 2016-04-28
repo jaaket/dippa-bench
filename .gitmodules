@@ -1,0 +1,3 @@
+[submodule "haskell-chart"]
+	path = haskell-chart
+	url = https://github.com/timbod7/haskell-chart

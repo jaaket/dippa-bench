@@ -48,23 +48,28 @@ plotBenchGroup group = toRenderable layout
 
     xAxisName = T.unpack (bgXAxisName group)
 
-    layout = layout_title .~ T.unpack (bgDescription group)
-           $ layout_plots .~ map toPlot plots
+    layout = layout_plots .~ map toPlot plots
            $ layout_x_axis . laxis_title .~ xAxisName
            $ layout_x_axis . laxis_generate .~ autoScaledPaddedAxis 0.1 def
            $ layout_y_axis . laxis_title .~ "time (s)"
+           $ layout_all_font_styles %~ ((font_size .~ 20) . (font_name .~ "Gill Sans"))
            $ def
 
-    styles = map ($ point_radius .~ 5 $ def) [
-          (point_color .~ opaque (Colour.sRGB24read "e41a1c")) .
+    styleCommon = point_radius .~ 7
+                $ point_color .~ transparent
+                $ point_border_width .~ 2
+                $ def
+
+    styles = map ($ styleCommon) [
+          (point_border_color .~ opaque (Colour.sRGB24read "e41a1c")) .
           (point_shape .~ PointShapeCircle)
-        , (point_color .~ opaque (Colour.sRGB24read "377eb8")) .
+        , (point_border_color .~ opaque (Colour.sRGB24read "377eb8")) .
           (point_shape .~ PointShapePolygon 4 False)
-        , (point_color .~ opaque (Colour.sRGB24read "4daf4a")) .
+        , (point_border_color .~ opaque (Colour.sRGB24read "4daf4a")) .
           (point_shape .~ PointShapePolygon 4 True)
-        , (point_color .~ opaque (Colour.sRGB24read "984ea3")) .
+        , (point_border_color .~ opaque (Colour.sRGB24read "984ea3")) .
           (point_shape .~ PointShapePolygon 3 False)
-        , (point_color .~ opaque (Colour.sRGB24read "ff7f00")) .
+        , (point_border_color .~ opaque (Colour.sRGB24read "ff7f00")) .
           (point_shape .~ PointShapePolygon 3 True)
         ]
 
