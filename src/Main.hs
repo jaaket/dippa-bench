@@ -45,7 +45,6 @@ import qualified Extensible.NQueens                     as Extensible
 import qualified Extensible.Reader                      as Extensible
 import qualified Extensible.State                       as Extensible
 import qualified Extensible.StateWriter                 as Extensible
-import qualified Extensible.Writer                      as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
@@ -211,7 +210,6 @@ benchmarks = [
               )
               [
                 ("monad-classes", Classes.repeatedTell)
-              , ("extensible-effects", Extensible.repeatedTell)
               , ("freer", Freer.repeatedTell)
               , ("mtl", Mtl.repeatedTell)
               ]
