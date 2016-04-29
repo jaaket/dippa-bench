@@ -10,6 +10,7 @@ import           Control.Arrow                          ((&&&))
 import           Control.Exception                      (bracket)
 import           Control.Lens                           ((&), (.~))
 import           Control.Monad                          (when)
+import           Control.Monad.Par.Class                (NFData)
 import           Criterion
 import           Criterion.Types                        (Report)
 import qualified Data.Binary                            as Bin
@@ -32,6 +33,7 @@ import           System.IO                              (BufferMode (..),
 
 import           Bench
 import qualified Classes.Countdown                      as Classes
+import qualified Classes.Cross                          as Classes
 import qualified Classes.Exception                      as Classes
 import qualified Classes.Reader                         as Classes
 import qualified Classes.State                          as Classes
@@ -53,6 +55,7 @@ import qualified Freer.State                            as Freer
 import qualified Freer.StateWriter                      as Freer
 import qualified Freer.Writer                           as Freer
 import qualified Mtl.Countdown                          as Mtl
+import qualified Mtl.Cross                              as Mtl
 import qualified Mtl.Exception                          as Mtl
 import qualified Mtl.NQueens                            as Mtl
 import qualified Mtl.Reader                             as Mtl
@@ -66,19 +69,25 @@ steps :: Num a => a -> a -> Int -> [a]
 steps _ _ 0 = []
 steps low stepSize n = low : steps (low + stepSize) stepSize (n - 1)
 
+genBenches :: (Integral a, NFData b) => [a] -> [(T.Text, a -> b)] -> [Bench Benchmarkable]
+genBenches xValues = map mkBench
+  where
+    mkBench (name, benchmark) =
+        Bench name (map (fromIntegral &&& nf benchmark) xValues)
+
+benchmarks :: [BenchGroup Benchmarkable]
 benchmarks = [
-      let numIters = steps (10^6) (10^6) 5 in
       BenchGroup {
             bgId = "cd"
           , bgDescription = "countdown"
-          , bgBenches = map (\(name, benchmark) ->
-                  Bench name (map (fromIntegral &&& whnf benchmark) numIters)
-                )
-                [ ("monad-classes", Classes.countdown)
+          , bgBenches = genBenches (steps (10^6) (10^6) 5)
+                [
+                  ("monad-classes", Classes.countdown)
                 , ("effects", Effects.countdown)
                 , ("extensible-effects", Extensible.countdown)
                 , ("freer", Freer.countdown)
-                , ("mtl", Mtl.countdown)]
+                , ("mtl", Mtl.countdown)
+                ]
           , bgXAxisName = "# of iterations"
       }
 
@@ -156,26 +165,23 @@ benchmarks = [
         , bgXAxisName = "# of Reader layers below State"
         }
 
-    , let numIters = steps (10^6) (10^6) 5 in
-      BenchGroup {
+    , BenchGroup {
           bgId = "exc"
         , bgDescription = "exception"
-        , bgBenches = map (\(name, benchmark) ->
-                Bench name (map (fromIntegral &&& whnf benchmark) numIters)
-              )
-              [ ("monad-classes", Classes.exception)
+        , bgBenches = genBenches (steps (10^6) (10^6) 5)
+              [
+                ("monad-classes", Classes.exception)
               , ("extensible-effects", Extensible.exception)
               , ("freer", Freer.exception)
-              , ("mtl", Mtl.exception)]
+              , ("mtl", Mtl.exception)
+              ]
         , bgXAxisName = "# of iterations"
         }
 
     , BenchGroup {
           bgId = "nq"
         , bgDescription = "n-queens"
-        , bgBenches = map (\(name, benchmark) ->
-                Bench name (map (fromIntegral &&& nf benchmark) [6..10])
-              )
+        , bgBenches = genBenches [6..10]
               [
                 ("effects", Effects.nQueens)
               , ("extensible-effects", Extensible.nQueens)
@@ -185,13 +191,10 @@ benchmarks = [
         , bgXAxisName = "n"
         }
 
-    , let numIters = steps (10^6) (10^6) 5 in
-      BenchGroup {
+    , BenchGroup {
           bgId = "cdr"
         , bgDescription = "countdownReader"
-        , bgBenches = map (\(name, benchmark) ->
-                Bench name (map (fromIntegral &&& whnf benchmark) numIters)
-              )
+        , bgBenches = genBenches (steps (10^6) (10^6) 5)
               [
                 ("monad-classes", Classes.countdownReader)
               , ("extensible-effects", Extensible.countdownReader)
@@ -201,13 +204,10 @@ benchmarks = [
         , bgXAxisName = "# of iterations"
         }
 
-    , let numIters = steps (10^5) (10^5) 5 in
-      BenchGroup {
+    , BenchGroup {
           bgId = "rt"
         , bgDescription = "repeatedTell"
-        , bgBenches = map (\(name, benchmark) ->
-                Bench name (map (fromIntegral &&& nf benchmark) numIters)
-              )
+        , bgBenches = genBenches (steps (10^5) (10^5) 5)
               [
                 ("monad-classes", Classes.repeatedTell)
               , ("freer", Freer.repeatedTell)
@@ -216,13 +216,10 @@ benchmarks = [
         , bgXAxisName = "# of iterations"
         }
 
-    , let numIters = steps (10^5) (10^5) 5 in
-      BenchGroup {
+    , BenchGroup {
           bgId = "was"
         , bgDescription = "countdown + writer, writer above state"
-        , bgBenches = map (\(name, benchmark) ->
-                Bench name (map (fromIntegral &&& nf benchmark) numIters)
-              )
+        , bgBenches = genBenches (steps (10^5) (10^5) 5)
               [
                 ("monad-classes", Classes.countdownWriterAbove)
               , ("extensible-effects", Extensible.countdownWriterAbove)
@@ -231,18 +228,60 @@ benchmarks = [
               ]
         , bgXAxisName = "# of iterations"
         }
-    , let numIters = steps (10^5) (10^5) 5 in
-      BenchGroup {
+
+    , BenchGroup {
           bgId = "wbs"
         , bgDescription = "countdown + writer, writer below state"
-        , bgBenches = map (\(name, benchmark) ->
-                Bench name (map (fromIntegral &&& nf benchmark) numIters)
-              )
+        , bgBenches = genBenches (steps (10^5) (10^5) 5)
               [
                 ("monad-classes", Classes.countdownWriterBelow)
               , ("extensible-effects", Extensible.countdownWriterBelow)
               , ("freer", Freer.countdownWriterBelow)
               , ("mtl", Mtl.countdownWriterBelow)
+              ]
+        , bgXAxisName = "# of iterations"
+        }
+
+    , BenchGroup {
+          bgId = "stateReader"
+        , bgDescription = "stateReader"
+        , bgBenches = genBenches (steps (10^8) (10^8) 5)
+              [
+                ("monad-classes", Classes.stateReader)
+              , ("mtl", Mtl.stateReader)
+              ]
+        , bgXAxisName = "# of iterations"
+        }
+
+    , BenchGroup {
+          bgId = "stateWriter"
+        , bgDescription = "stateWriter"
+        , bgBenches = genBenches (steps (10^6) (10^6) 5)
+              [
+                ("monad-classes", Classes.stateWriter)
+              , ("mtl", Mtl.stateWriter)
+              ]
+        , bgXAxisName = "# of iterations"
+        }
+
+    , BenchGroup {
+          bgId = "stateException"
+        , bgDescription = "stateException"
+        , bgBenches = genBenches (steps (10^8) (10^8) 5)
+              [
+                ("monad-classes", Classes.stateException)
+              , ("mtl", Mtl.stateException)
+              ]
+        , bgXAxisName = "# of iterations"
+        }
+
+    , BenchGroup {
+          bgId = "readerState"
+        , bgDescription = "readerState"
+        , bgBenches = genBenches (steps (10^8) (10^8) 5)
+              [
+                ("monad-classes", Classes.readerState)
+              , ("mtl", Mtl.readerState)
               ]
         , bgXAxisName = "# of iterations"
         }

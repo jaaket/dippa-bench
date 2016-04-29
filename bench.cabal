@@ -17,6 +17,7 @@ executable bench
   main-is:             Main.hs
   other-modules:       Bench
                      , Classes.Countdown
+                     , Classes.Cross
                      , Classes.Exception
                      , Classes.Reader
                      , Classes.State
@@ -40,6 +41,7 @@ executable bench
                      , Freer.StateWriter
                      , Freer.Writer
                      , Mtl.Countdown
+                     , Mtl.Cross
                      , Mtl.Exception
                      , Mtl.NQueens
                      , Mtl.Reader
@@ -70,3 +72,4 @@ executable bench
                      , data-default
                      , lens
                      , directory
+                     , abstract-par
