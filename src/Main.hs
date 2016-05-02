@@ -1,8 +1,9 @@
-{-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE FlexibleContexts  #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators     #-}
+{-# LANGUAGE DataKinds                 #-}
+{-# LANGUAGE DeriveGeneric             #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleContexts          #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE TypeOperators             #-}
 
 module Main where
 
@@ -48,6 +49,7 @@ import qualified Extensible.Reader                      as Extensible
 import qualified Extensible.State                       as Extensible
 import qualified Extensible.StateWriter                 as Extensible
 import qualified Freer.Countdown                        as Freer
+import qualified Freer.Cross                            as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.NQueens                          as Freer
 import qualified Freer.Reader                           as Freer
@@ -241,50 +243,59 @@ benchmarks = [
               ]
         , bgXAxisName = "# of iterations"
         }
+    ] ++ map parseDeclaration crossBenchDeclarations
 
-    , BenchGroup {
-          bgId = "stateReader"
-        , bgDescription = "stateReader"
-        , bgBenches = genBenches (steps (10^8) (10^8) 5)
-              [
-                ("monad-classes", Classes.stateReader)
-              , ("mtl", Mtl.stateReader)
-              ]
-        , bgXAxisName = "# of iterations"
-        }
+data BenchDecl = forall a b. (Integral a, NFData b) => BenchDecl {
+      bdName      :: T.Text
+    , bdMagnitude :: a
+    , bdBenches   :: [(T.Text, a -> b)]
+    }
 
-    , BenchGroup {
-          bgId = "stateWriter"
-        , bgDescription = "stateWriter"
-        , bgBenches = genBenches (steps (10^6) (10^6) 5)
-              [
-                ("monad-classes", Classes.stateWriter)
-              , ("mtl", Mtl.stateWriter)
-              ]
-        , bgXAxisName = "# of iterations"
-        }
+parseDeclaration :: BenchDecl -> BenchGroup Benchmarkable
+parseDeclaration (BenchDecl name magnitude fwsAndFuns) = BenchGroup {
+      bgId = name
+    , bgDescription = name
+    , bgBenches = genBenches (steps magnitude magnitude 5) fwsAndFuns
+    , bgXAxisName = "# of iterations"
+    }
 
-    , BenchGroup {
-          bgId = "stateException"
-        , bgDescription = "stateException"
-        , bgBenches = genBenches (steps (10^8) (10^8) 5)
-              [
-                ("monad-classes", Classes.stateException)
-              , ("mtl", Mtl.stateException)
-              ]
-        , bgXAxisName = "# of iterations"
-        }
-
-    , BenchGroup {
-          bgId = "readerState"
-        , bgDescription = "readerState"
-        , bgBenches = genBenches (steps (10^8) (10^8) 5)
-              [
-                ("monad-classes", Classes.readerState)
-              , ("mtl", Mtl.readerState)
-              ]
-        , bgXAxisName = "# of iterations"
-        }
+crossBenchDeclarations :: [BenchDecl]
+crossBenchDeclarations = [
+      BenchDecl "stateState" (10^7) [
+          ("freer", Freer.stateState)
+        , ("monad-classes", Classes.stateState)
+        , ("mtl", Mtl.stateState)
+        ]
+    , BenchDecl "stateReader" (10^7) [
+          ("freer", Freer.stateReader)
+        , ("monad-classes", Classes.stateReader)
+        , ("mtl", Mtl.stateReader)
+        ]
+    , BenchDecl "stateWriter" (10^7) [
+          ("freer", Freer.stateWriter)
+        , ("monad-classes", Classes.stateWriter)
+        , ("mtl", Mtl.stateWriter)
+        ]
+    , BenchDecl "stateException" (10^7) [
+          ("freer", Freer.stateException)
+        , ("monad-classes", Classes.stateException)
+        , ("mtl", Mtl.stateException)
+        ]
+    , BenchDecl "readerState" (10^7) [
+          ("freer", Freer.readerState)
+        , ("monad-classes", Classes.readerState)
+        , ("mtl", Mtl.readerState)
+        ]
+    , BenchDecl "readerReader" (10^3) [
+          ("freer", Freer.readerReader)
+        , ("monad-classes", Classes.readerReader)
+        , ("mtl", Mtl.readerReader)
+        ]
+    , BenchDecl "readerWriter" (10^3) [
+          ("freer", Freer.readerWriter)
+        , ("monad-classes", Classes.readerWriter)
+        , ("mtl", Mtl.readerWriter)
+        ]
     ]
 
 data Options =

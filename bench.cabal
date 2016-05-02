@@ -34,6 +34,7 @@ executable bench
                      , Extensible.StateWriter
                      , Extensible.Writer
                      , Freer.Countdown
+                     , Freer.Cross
                      , Freer.Exception
                      , Freer.NQueens
                      , Freer.Reader
