@@ -87,14 +87,15 @@ readerWriterInner = do
 readerWriter :: Int -> Int
 readerWriter n = getSum $ snd $ runWriter $ runReaderT readerWriterInner n
 
+readerExceptionInner :: (MonadReader Int m, MonadError Int m) => m Int
+readerExceptionInner = do
+    x <- ask
+    if x == 0
+        then throwError x
+        else local (subtract 1) readerExceptionInner
+
 readerException :: Int -> Either Int Int
-readerException n = runExcept $ runReaderT go n
-  where
-    go = do
-        x <- ask
-        if x == 0
-            then throwError x
-            else local (subtract 1) go
+readerException n = runExcept $ runReaderT readerExceptionInner n
 
 writerState :: Int -> Int
 writerState n = getSum $ snd $ flip evalState n $ runWriterT stateWriterInner
@@ -113,3 +114,6 @@ writerException n = fmap snd $ runExcept $ runWriterT $ do
 
 exceptionState :: Int -> Either Int Int
 exceptionState n = flip evalState n $ runExceptT stateExceptionInner
+
+exceptionReader :: Int -> Either Int Int
+exceptionReader n = flip runReader n $ runExceptT readerExceptionInner
