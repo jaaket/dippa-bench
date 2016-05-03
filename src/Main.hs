@@ -231,37 +231,37 @@ parseDeclaration (BenchDecl name magnitude fwsAndFuns) = BenchGroup {
 
 crossBenchDeclarations :: [BenchDecl]
 crossBenchDeclarations = [
-      BenchDecl "stateState" (10^7) [
+      BenchDecl "ss" (10^7) [
           ("freer", Freer.stateState)
         , ("monad-classes", Classes.stateState)
         , ("mtl", Mtl.stateState)
         ]
-    , BenchDecl "stateReader" (10^7) [
+    , BenchDecl "sr" (10^7) [
           ("freer", Freer.stateReader)
         , ("monad-classes", Classes.stateReader)
         , ("mtl", Mtl.stateReader)
         ]
-    , BenchDecl "stateWriter" (10^7) [
+    , BenchDecl "sw" (10^7) [
           ("freer", Freer.stateWriter)
         , ("monad-classes", Classes.stateWriter)
         , ("mtl", Mtl.stateWriter)
         ]
-    , BenchDecl "stateException" (10^7) [
+    , BenchDecl "se" (10^7) [
           ("freer", Freer.stateException)
         , ("monad-classes", Classes.stateException)
         , ("mtl", Mtl.stateException)
         ]
-    , BenchDecl "readerState" (10^7) [
+    , BenchDecl "rs" (10^7) [
           ("freer", Freer.readerState)
         , ("monad-classes", Classes.readerState)
         , ("mtl", Mtl.readerState)
         ]
-    , BenchDecl "readerReader" (10^3) [
+    , BenchDecl "rr" (10^3) [
           ("freer", Freer.readerReader)
         , ("monad-classes", Classes.readerReader)
         , ("mtl", Mtl.readerReader)
         ]
-    , BenchDecl "readerWriter" (10^3) [
+    , BenchDecl "rw" (10^3) [
           ("freer", Freer.readerWriter)
         , ("monad-classes", Classes.readerWriter)
         , ("mtl", Mtl.readerWriter)
