@@ -205,7 +205,7 @@ benchmarks = [
     , BenchGroup {
           bgId = "wbs"
         , bgDescription = "countdown + writer, writer below state"
-        , bgBenches = genBenches (steps (10^5) (10^5) 5)
+        , bgBenches = genBenches (steps (10^3) (10^3) 5)
               [
                 ("monad-classes", Classes.countdownWriterBelow)
               , ("freer", Freer.countdownWriterBelow)
