@@ -40,14 +40,6 @@ import qualified Classes.Reader                         as Classes
 import qualified Classes.State                          as Classes
 import qualified Classes.StateWriter                    as Classes
 import qualified Classes.Writer                         as Classes
-import qualified Effects.Countdown                      as Effects
-import qualified Effects.NQueens                        as Effects
-import qualified Extensible.Countdown                   as Extensible
-import qualified Extensible.Exception                   as Extensible
-import qualified Extensible.NQueens                     as Extensible
-import qualified Extensible.Reader                      as Extensible
-import qualified Extensible.State                       as Extensible
-import qualified Extensible.StateWriter                 as Extensible
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Cross                            as Freer
 import qualified Freer.Exception                        as Freer
@@ -85,8 +77,6 @@ benchmarks = [
           , bgBenches = genBenches (steps (10^6) (10^6) 5)
                 [
                   ("monad-classes", Classes.countdown)
-                , ("effects", Effects.countdown)
-                , ("extensible-effects", Extensible.countdown)
                 , ("freer", Freer.countdown)
                 , ("mtl", Mtl.countdown)
                 ]
@@ -111,13 +101,6 @@ benchmarks = [
               , whnf Freer.readersAboveState3 n
               , whnf Freer.readersAboveState4 n
               , whnf Freer.readersAboveState5 n
-              ])
-          , Bench "extensible-effects" (zip [1..5] [
-                whnf Extensible.readersAboveState1 n
-              , whnf Extensible.readersAboveState2 n
-              , whnf Extensible.readersAboveState3 n
-              , whnf Extensible.readersAboveState4 n
-              , whnf Extensible.readersAboveState5 n
               ])
           , Bench "monad-classes" (zip [1..5] [
                 whnf Classes.readersAboveState1 n
@@ -149,13 +132,6 @@ benchmarks = [
                 , whnf Freer.readersBelowState4 n
                 , whnf Freer.readersBelowState5 n
                 ])
-            , Bench "extensible-effects" (zip [1..5] [
-                  whnf Extensible.readersBelowState1 n
-                , whnf Extensible.readersBelowState2 n
-                , whnf Extensible.readersBelowState3 n
-                , whnf Extensible.readersBelowState4 n
-                , whnf Extensible.readersBelowState5 n
-                ])
             , Bench "monad-classes" (zip [1..5] [
                   whnf Classes.readersBelowState1 n
                 , whnf Classes.readersBelowState2 n
@@ -173,7 +149,6 @@ benchmarks = [
         , bgBenches = genBenches (steps (10^6) (10^6) 5)
               [
                 ("monad-classes", Classes.exception)
-              , ("extensible-effects", Extensible.exception)
               , ("freer", Freer.exception)
               , ("mtl", Mtl.exception)
               ]
@@ -185,9 +160,7 @@ benchmarks = [
         , bgDescription = "n-queens"
         , bgBenches = genBenches [6..10]
               [
-                ("effects", Effects.nQueens)
-              , ("extensible-effects", Extensible.nQueens)
-              , ("freer", Freer.nQueens)
+                ("freer", Freer.nQueens)
               , ("mtl", Mtl.nQueens)
               ]
         , bgXAxisName = "n"
@@ -199,7 +172,6 @@ benchmarks = [
         , bgBenches = genBenches (steps (10^6) (10^6) 5)
               [
                 ("monad-classes", Classes.countdownReader)
-              , ("extensible-effects", Extensible.countdownReader)
               , ("freer", Freer.countdownReader)
               , ("mtl", Mtl.countdownReader)
               ]
@@ -224,7 +196,6 @@ benchmarks = [
         , bgBenches = genBenches (steps (10^3) (10^3) 5)
               [
                 ("monad-classes", Classes.countdownWriterAbove)
-              , ("extensible-effects", Extensible.countdownWriterAbove)
               , ("freer", Freer.countdownWriterAbove)
               , ("mtl", Mtl.countdownWriterAbove)
               ]
@@ -237,7 +208,6 @@ benchmarks = [
         , bgBenches = genBenches (steps (10^5) (10^5) 5)
               [
                 ("monad-classes", Classes.countdownWriterBelow)
-              , ("extensible-effects", Extensible.countdownWriterBelow)
               , ("freer", Freer.countdownWriterBelow)
               , ("mtl", Mtl.countdownWriterBelow)
               ]
