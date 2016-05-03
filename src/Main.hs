@@ -291,20 +291,25 @@ crossBenchDeclarations = [
         , ("monad-classes", Classes.writerException)
         , ("mtl", Mtl.writerException)
         ]
-    , BenchDecl "es" (10^3) [
+    , BenchDecl "es" (10^7) [
           ("freer", Freer.exceptionState)
         , ("monad-classes", Classes.exceptionState)
         , ("mtl", Mtl.exceptionState)
         ]
-    , BenchDecl "er" (10^3) [
+    , BenchDecl "er" (10^7) [
           ("freer", Freer.exceptionReader)
         , ("monad-classes", Classes.exceptionReader)
         , ("mtl", Mtl.exceptionReader)
         ]
-    , BenchDecl "ew" (10^3) [
+    , BenchDecl "ew" (10^7) [
           ("freer", Freer.exceptionWriter)
         , ("monad-classes", Classes.exceptionWriter)
         , ("mtl", Mtl.exceptionWriter)
+        ]
+    , BenchDecl "ee" (10^8) [
+          ("freer", Freer.exceptionException)
+        , ("monad-classes", Classes.exceptionException)
+        , ("mtl", Mtl.exceptionException)
         ]
     ]
 

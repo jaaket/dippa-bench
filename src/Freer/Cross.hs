@@ -3,7 +3,7 @@
 module Freer.Cross where
 
 import           Control.Arrow (first)
-import           Control.Monad (replicateM_)
+import           Control.Monad (foldM, replicateM_)
 import           Control.Monad.Freer
 import           Control.Monad.Freer.Exception
 import           Control.Monad.Freer.Reader
@@ -141,3 +141,14 @@ exceptionWriter n = fst helper
     -- GHC needs help choosing monoid instance
     helper :: (Either ErrCode Int, [Int])
     helper = run $ runWriter $ runError $ writerExceptionInner n
+
+exceptionInner :: Member (Exc ErrCode) r  => Int -> Eff r Int
+exceptionInner n = foldM f 1 (replicate n 1 ++ [0])
+  where
+    f _ x | x == 0 = throwError (ErrCode 0)
+    f acc x = return $! acc * x
+
+exceptionException :: Int -> Either String (Either ErrCode Int)
+exceptionException n = run $ runError $ runError $ do
+    exceptionInner n
+    throwError "error"

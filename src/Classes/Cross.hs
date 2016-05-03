@@ -3,7 +3,7 @@
 module Classes.Cross where
 
 import           Control.Arrow (first)
-import           Control.Monad (replicateM_)
+import           Control.Monad (foldM, replicateM_)
 import           Control.Monad.Classes
 import           Control.Monad.Classes.Run
 import           Data.Monoid
@@ -139,3 +139,14 @@ exceptionWriter n = fst helper
     -- GHC needs help choosing monoid instance
     helper :: (Either ErrCode Int, [Int])
     helper = run $ runWriterStrict $ runExcept $ writerExceptionInner n
+
+exceptionInner :: MonadExcept ErrCode m => Int -> m Int
+exceptionInner n = foldM f 1 (replicate n 1 ++ [0])
+  where
+    f _ x | x == 0 = throw (ErrCode 0)
+    f acc x = return $! acc * x
+
+exceptionException :: Int -> Either String (Either ErrCode Int)
+exceptionException n = run $ runExcept $ runExcept $ do
+    exceptionInner n
+    throw "error"

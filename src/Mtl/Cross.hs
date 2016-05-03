@@ -126,3 +126,14 @@ exceptionReader n = flip runReader n $ runExceptT readerExceptionInner
 
 exceptionWriter :: Int -> Either ErrCode Int
 exceptionWriter n = fst $ runWriter $ runExceptT $ writerExceptionInner n
+
+exceptionInner :: MonadError ErrCode m => Int -> m Int
+exceptionInner n = foldM f 1 (replicate n 1 ++ [0])
+  where
+    f _ x | x == 0 = throwError (ErrCode 0)
+    f acc x = return $! acc * x
+
+exceptionException :: Int -> Either String (Either ErrCode Int)
+exceptionException n = runExcept $ runExceptT $ do
+    exceptionInner n
+    lift (throwError "error")
