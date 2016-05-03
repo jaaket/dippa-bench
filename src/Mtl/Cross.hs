@@ -33,15 +33,16 @@ stateReader n = flip runReader 0 $ evalStateT go n
             then return x
             else put (x - 1) >> go
 
+stateWriterInner :: (MonadState Int m, MonadWriter (Sum Int) m) => m Int
+stateWriterInner = do
+    x <- get
+    tell (Sum x)
+    if x == 0
+        then return x
+        else put (x - 1) >> stateWriterInner
+
 stateWriter :: Int -> Int
-stateWriter n = getSum $ snd $ runWriter $ evalStateT go n
-  where
-    go = do
-        x <- get
-        tell (Sum x)
-        if x == 0
-            then return x
-            else put (x - 1) >> go
+stateWriter n = getSum $ snd $ runWriter $ evalStateT stateWriterInner n
 
 stateException :: Int -> Either Int Int
 stateException n = runExcept $ evalStateT go n
@@ -73,16 +74,16 @@ readerReader n = flip runReader (S1 n) $ runReaderT go (S2 n)
                 else local (\(S2 y) -> S2 (y - 1)) go
             else lift $ local (\(S1 x) -> S1 (x - 1)) (runReaderT go (S2 y))
 
+readerWriterInner :: (MonadReader Int m, MonadWriter (Sum Int) m) => m Int
+readerWriterInner = do
+    x <- ask
+    tell (Sum x)
+    if x == 0
+        then return x
+        else local (subtract (1 :: Int)) readerWriterInner
 
 readerWriter :: Int -> Int
-readerWriter n = getSum $ snd $ runWriter $ runReaderT go n
-  where
-    go = do
-        x <- ask
-        tell (Sum x)
-        if x == 0
-            then return x
-            else local (subtract (1 :: Int)) go
+readerWriter n = getSum $ snd $ runWriter $ runReaderT readerWriterInner n
 
 readerException :: Int -> Either Int Int
 readerException n = runExcept $ runReaderT go n
@@ -92,3 +93,9 @@ readerException n = runExcept $ runReaderT go n
         if x == 0
             then throwError x
             else local (subtract 1) go
+
+writerState :: Int -> Int
+writerState n = getSum $ snd $ flip evalState n $ runWriterT stateWriterInner
+
+writerReader :: Int -> Int
+writerReader n = getSum $ snd $ flip runReader n $ runWriterT readerWriterInner

@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Freer.Cross where
 
 import           Control.Monad.Freer
@@ -33,15 +35,17 @@ stateReader n = snd $ run $ flip runReader (0 :: Int) $ runState go n
             then return x
             else put (x - 1 :: Int) >> go
 
+stateWriterInner :: (Member (State Int) r, Member (Writer (Sum Int)) r)
+                 => Eff r Int
+stateWriterInner = do
+    x <- get
+    tell (Sum (x :: Int))
+    if x == 0
+        then return x
+        else put (x - 1) >> stateWriterInner
+
 stateWriter :: Int -> Int
-stateWriter n = getSum $ snd $ run $ runWriter $ runState go n
-  where
-    go = do
-        x <- get
-        tell (Sum (x :: Int))
-        if x == 0
-            then return x
-            else put (x - 1) >> go
+stateWriter n = getSum $ snd $ run $ runWriter $ runState stateWriterInner n
 
 stateException :: Int -> Either Int Int
 stateException n = fmap snd $ run $ runError $ runState go n
@@ -73,15 +77,17 @@ readerReader n = run $ flip runReader (S1 n) $ runReader go (S2 n)
                 else local (\(S2 y) -> S2 (y - 1)) go
             else local (\(S1 x) -> S1 (x - 1)) go
 
+readerWriterInner :: (Member (Reader Int) r, Member (Writer (Sum Int)) r)
+                  => Eff r Int
+readerWriterInner = do
+    x <- ask
+    tell (Sum (x :: Int))
+    if x == 0
+        then return x
+        else local (subtract (1 :: Int)) readerWriterInner
+
 readerWriter :: Int -> Int
-readerWriter n = getSum $ snd $ run $ runWriter $ runReader go n
-  where
-    go = do
-        x <- ask
-        tell (Sum (x :: Int))
-        if x == 0
-            then return x
-            else local (subtract (1 :: Int)) go
+readerWriter n = getSum $ snd $ run $ runWriter $ runReader readerWriterInner n
 
 readerException :: Int -> Either Int Int
 readerException n = run $ runError $ runReader go n
@@ -91,3 +97,11 @@ readerException n = run $ runError $ runReader go n
         if x == (0 :: Int)
             then throwError x
             else local (subtract (1 :: Int)) go
+
+writerState :: Int -> Int
+writerState n =
+    getSum $ snd $ fst $ run $ flip runState n $ runWriter stateWriterInner
+
+writerReader :: Int -> Int
+writerReader n =
+    getSum $ snd $ run $ flip runReader n $ runWriter readerWriterInner

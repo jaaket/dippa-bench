@@ -34,15 +34,17 @@ stateReader n = run $ runReader (Env 0) $ evalStateStrict n go
             then return x
             else put (x - 1) >> go
 
+stateWriterInner :: (MonadState Int m, MonadWriter (Sum Int) m) => m Int
+stateWriterInner = do
+    x <- get
+    tell (Sum x)
+    if x == 0
+        then return x
+        else put (x - 1 :: Int) >> stateWriterInner
+
 stateWriter :: Int -> Int
-stateWriter n = getSum $ snd $ run $ runWriterStrict $ evalStateStrict n go
-  where
-    go = do
-        x <- get
-        tell (Sum x)
-        if x == 0
-            then return x
-            else put (x - 1 :: Int) >> go
+stateWriter n =
+    getSum $ snd $ run $ runWriterStrict $ evalStateStrict n stateWriterInner
 
 stateException :: Int -> Either Int Int
 stateException n = run $ runExcept $ evalStateStrict n go
@@ -75,15 +77,17 @@ readerReader n = run $ runReader (S1 n) $ runReader (S2 n) go
                 else local (\(S2 y) -> S2 (y - 1)) go
             else local (\(S1 x) -> S1 (x - 1)) go
 
+readerWriterInner :: (MonadReader Int m, MonadLocal Int m, MonadWriter (Sum Int) m) => m Int
+readerWriterInner = do
+    x <- ask
+    tell (Sum x)
+    if x == (0 :: Int)
+        then return x
+        else local (subtract (1 :: Int)) readerWriterInner
+
 readerWriter :: Int -> Int
-readerWriter n = getSum $ snd $ run $ runWriterStrict $ runReader n go
-  where
-    go = do
-        x <- ask
-        tell (Sum x)
-        if x == (0 :: Int)
-            then return x
-            else local (subtract (1 :: Int)) go
+readerWriter n =
+    getSum $ snd $ run $ runWriterStrict $ runReader n readerWriterInner
 
 readerException :: Int -> Either Int Int
 readerException n = run $ runExcept $ runReader n go
@@ -93,3 +97,11 @@ readerException n = run $ runExcept $ runReader n go
         if x == (0 :: Int)
             then throw x
             else local (subtract (1 :: Int)) go
+
+writerState :: Int -> Int
+writerState n =
+    getSum $ snd $ run $ evalStateStrict n $ runWriterStrict stateWriterInner
+
+writerReader :: Int -> Int
+writerReader n =
+    getSum $ snd $ run $ runReader n $ runWriterStrict readerWriterInner
