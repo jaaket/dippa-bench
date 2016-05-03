@@ -23,6 +23,7 @@ executable bench
                      , Classes.State
                      , Classes.StateWriter
                      , Classes.Writer
+                     , Common.ErrCode
                      , Common.NQueens
                      , Effects.Countdown
                      , Effects.NQueens
@@ -74,3 +75,4 @@ executable bench
                      , lens
                      , directory
                      , abstract-par
+                     , deepseq

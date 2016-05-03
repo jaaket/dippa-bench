@@ -11,6 +11,8 @@ import           Control.Monad.Freer.State
 import           Control.Monad.Freer.Writer
 import           Data.Monoid
 
+import           Common.ErrCode
+
 
 newtype S1 = S1 Int
 newtype S2 = S2 Int
@@ -49,14 +51,15 @@ stateWriterInner = do
 stateWriter :: Int -> Int
 stateWriter n = getSum $ snd $ run $ runWriter $ runState stateWriterInner n
 
-stateExceptionInner :: (Member (State Int) r, Member (Exc Int) r) => Eff r Int
+stateExceptionInner :: (Member (State Int) r, Member (Exc ErrCode) r)
+                    => Eff r Int
 stateExceptionInner = do
     x <- get
     if x == 0
-        then throwError x
+        then throwError (ErrCode x)
         else put (x - 1 :: Int) >> stateExceptionInner
 
-stateException :: Int -> Either Int Int
+stateException :: Int -> Either ErrCode Int
 stateException n = fmap snd $ run $ runError $ runState stateExceptionInner n
 
 readerState :: Int -> Int
@@ -92,14 +95,15 @@ readerWriterInner = do
 readerWriter :: Int -> Int
 readerWriter n = getSum $ snd $ run $ runWriter $ runReader readerWriterInner n
 
-readerExceptionInner :: (Member (Reader Int) r, Member (Exc Int) r) => Eff r Int
+readerExceptionInner :: (Member (Reader Int) r, Member (Exc ErrCode) r)
+                     => Eff r Int
 readerExceptionInner = do
     x <- ask
     if x == (0 :: Int)
-        then throwError x
+        then throwError (ErrCode x)
         else local (subtract (1 :: Int)) readerExceptionInner
 
-readerException :: Int -> Either Int Int
+readerException :: Int -> Either ErrCode Int
 readerException n = run $ runError $ runReader readerExceptionInner n
 
 writerState :: Int -> Int
@@ -114,14 +118,26 @@ writerWriter :: Int -> (Int, [Int])
 writerWriter n = first (getSum . snd) $ run $ runWriter $ runWriter $
     replicateM_ n (tell (Sum (1 :: Int)) >> tell [1 :: Int])
 
-writerException :: Int -> Either Int [Int]
-writerException n = fmap snd $ run $ runError $ runWriter $ do
+writerExceptionInner :: (Member (Writer [Int]) r, Member (Exc ErrCode) r)
+                     => Int -> Eff r Int
+writerExceptionInner n = do
     replicateM_ n (tell [1 :: Int])
-    throwError (0 :: Int)
+    throwError (ErrCode 0)
 
-exceptionState :: Int -> Either Int Int
+writerException :: Int -> Either ErrCode [Int]
+writerException n =
+    fmap snd $ run $ runError $ runWriter $ writerExceptionInner n
+
+exceptionState :: Int -> Either ErrCode Int
 exceptionState n =
     fst $ run $ flip runState n $ runError stateExceptionInner
 
-exceptionReader :: Int -> Either Int Int
+exceptionReader :: Int -> Either ErrCode Int
 exceptionReader n = run $ flip runReader n $ runError readerExceptionInner
+
+exceptionWriter :: Int -> Either ErrCode Int
+exceptionWriter n = fst helper
+  where
+    -- GHC needs help choosing monoid instance
+    helper :: (Either ErrCode Int, [Int])
+    helper = run $ runWriter $ runError $ writerExceptionInner n

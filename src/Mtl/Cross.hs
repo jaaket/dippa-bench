@@ -8,6 +8,8 @@ import           Control.Monad.Reader
 import           Control.Monad.State.Strict
 import           Control.Monad.Writer.Strict
 
+import           Common.ErrCode
+
 
 newtype S1 = S1 Int
 newtype S2 = S2 Int
@@ -45,14 +47,14 @@ stateWriterInner = do
 stateWriter :: Int -> Int
 stateWriter n = getSum $ snd $ runWriter $ evalStateT stateWriterInner n
 
-stateExceptionInner :: (MonadState Int m, MonadError Int m) => m Int
+stateExceptionInner :: (MonadState Int m, MonadError ErrCode m) => m Int
 stateExceptionInner = do
     x <- get
     if x == 0
-        then throwError x
+        then throwError (ErrCode x)
         else put (x - 1) >> stateExceptionInner
 
-stateException :: Int -> Either Int Int
+stateException :: Int -> Either ErrCode Int
 stateException n = runExcept $ evalStateT stateExceptionInner n
 
 readerState :: Int -> Int
@@ -87,14 +89,14 @@ readerWriterInner = do
 readerWriter :: Int -> Int
 readerWriter n = getSum $ snd $ runWriter $ runReaderT readerWriterInner n
 
-readerExceptionInner :: (MonadReader Int m, MonadError Int m) => m Int
+readerExceptionInner :: (MonadReader Int m, MonadError ErrCode m) => m Int
 readerExceptionInner = do
     x <- ask
     if x == 0
-        then throwError x
+        then throwError (ErrCode x)
         else local (subtract 1) readerExceptionInner
 
-readerException :: Int -> Either Int Int
+readerException :: Int -> Either ErrCode Int
 readerException n = runExcept $ runReaderT readerExceptionInner n
 
 writerState :: Int -> Int
@@ -107,13 +109,20 @@ writerWriter :: Int -> (Int, [Int])
 writerWriter n = first (getSum . snd) $ runWriter $ runWriterT $
     replicateM_ n (tell (Sum (1 :: Int)) >> lift (tell [1 :: Int]))
 
-writerException :: Int -> Either Int [Int]
-writerException n = fmap snd $ runExcept $ runWriterT $ do
+writerExceptionInner :: (MonadWriter [Int] m, MonadError ErrCode m)
+                     => Int -> m Int
+writerExceptionInner n = do
     replicateM_ n (tell [1])
-    throwError 0
+    throwError (ErrCode 0)
 
-exceptionState :: Int -> Either Int Int
+writerException :: Int -> Either ErrCode [Int]
+writerException n = fmap snd $ runExcept $ runWriterT $ writerExceptionInner n
+
+exceptionState :: Int -> Either ErrCode Int
 exceptionState n = flip evalState n $ runExceptT stateExceptionInner
 
-exceptionReader :: Int -> Either Int Int
+exceptionReader :: Int -> Either ErrCode Int
 exceptionReader n = flip runReader n $ runExceptT readerExceptionInner
+
+exceptionWriter :: Int -> Either ErrCode Int
+exceptionWriter n = fst $ runWriter $ runExceptT $ writerExceptionInner n
