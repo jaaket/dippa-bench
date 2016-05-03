@@ -48,14 +48,15 @@ stateWriter :: Int -> Int
 stateWriter n =
     getSum $ snd $ run $ runWriterStrict $ evalStateStrict n stateWriterInner
 
+stateExceptionInner :: (MonadState Int m, MonadExcept Int m) => m Int
+stateExceptionInner = do
+    x <- get
+    if x == 0
+        then throw x
+        else put (x - 1 :: Int) >> stateExceptionInner
+
 stateException :: Int -> Either Int Int
-stateException n = run $ runExcept $ evalStateStrict n go
-  where
-    go = do
-        x <- get
-        if x == 0
-            then throw x
-            else put (x - 1 :: Int) >> go
+stateException n = run $ runExcept $ evalStateStrict n stateExceptionInner
 
 readerState :: Int -> Int
 readerState n = run $ evalStateStrict n $ runReader (0 :: Int) go
@@ -116,3 +117,6 @@ writerException :: Int -> Either Int [Int]
 writerException n = fmap snd $ run $ runExcept $ runWriterStrict $ do
     replicateM_ n (tell [1 :: Int])
     throw (0 :: Int)
+
+exceptionState :: Int -> Either Int Int
+exceptionState n = run $ evalStateStrict n $ runExcept stateExceptionInner

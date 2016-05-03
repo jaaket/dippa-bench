@@ -49,14 +49,15 @@ stateWriterInner = do
 stateWriter :: Int -> Int
 stateWriter n = getSum $ snd $ run $ runWriter $ runState stateWriterInner n
 
+stateExceptionInner :: (Member (State Int) r, Member (Exc Int) r) => Eff r Int
+stateExceptionInner = do
+    x <- get
+    if x == 0
+        then throwError x
+        else put (x - 1 :: Int) >> stateExceptionInner
+
 stateException :: Int -> Either Int Int
-stateException n = fmap snd $ run $ runError $ runState go n
-  where
-    go = do
-        x <- get
-        if x == 0
-            then throwError x
-            else put (x - 1 :: Int) >> go
+stateException n = fmap snd $ run $ runError $ runState stateExceptionInner n
 
 readerState :: Int -> Int
 readerState n = fst $ run $ flip runState n $ runReader go 0
@@ -116,3 +117,7 @@ writerException :: Int -> Either Int [Int]
 writerException n = fmap snd $ run $ runError $ runWriter $ do
     replicateM_ n (tell [1 :: Int])
     throwError (0 :: Int)
+
+exceptionState :: Int -> Either Int Int
+exceptionState n =
+    fst $ run $ flip runState n $ runError stateExceptionInner
