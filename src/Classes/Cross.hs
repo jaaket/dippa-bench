@@ -111,3 +111,8 @@ writerReader n =
 writerWriter :: Int -> (Int, [Int])
 writerWriter n = first (getSum . snd) $ run $ runWriterStrict $ runWriterStrict $
     replicateM_ n (tell (Sum (1 :: Int)) >> tell [1 :: Int])
+
+writerException :: Int -> Either Int [Int]
+writerException n = fmap snd $ run $ runExcept $ runWriterStrict $ do
+    replicateM_ n (tell [1 :: Int])
+    throw (0 :: Int)

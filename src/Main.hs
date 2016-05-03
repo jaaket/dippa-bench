@@ -286,6 +286,11 @@ crossBenchDeclarations = [
         , ("monad-classes", Classes.writerWriter)
         , ("mtl", Mtl.writerWriter)
         ]
+    , BenchDecl "we" (10^3) [
+          ("freer", Freer.writerException)
+        , ("monad-classes", Classes.writerException)
+        , ("mtl", Mtl.writerException)
+        ]
     ]
 
 data Options =

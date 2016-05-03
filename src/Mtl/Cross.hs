@@ -104,3 +104,8 @@ writerReader n = getSum $ snd $ flip runReader n $ runWriterT readerWriterInner
 writerWriter :: Int -> (Int, [Int])
 writerWriter n = first (getSum . snd) $ runWriter $ runWriterT $
     replicateM_ n (tell (Sum (1 :: Int)) >> lift (tell [1 :: Int]))
+
+writerException :: Int -> Either Int [Int]
+writerException n = fmap snd $ runExcept $ runWriterT $ do
+    replicateM_ n (tell [1])
+    throwError 0
