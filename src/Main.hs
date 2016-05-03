@@ -266,6 +266,11 @@ crossBenchDeclarations = [
         , ("monad-classes", Classes.readerWriter)
         , ("mtl", Mtl.readerWriter)
         ]
+    , BenchDecl "re" (10^6) [
+          ("freer", Freer.readerException)
+        , ("monad-classes", Classes.readerException)
+        , ("mtl", Mtl.readerException)
+        ]
     ]
 
 data Options =

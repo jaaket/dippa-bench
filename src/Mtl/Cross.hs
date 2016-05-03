@@ -83,3 +83,12 @@ readerWriter n = getSum $ snd $ runWriter $ runReaderT go n
         if x == 0
             then return x
             else local (subtract (1 :: Int)) go
+
+readerException :: Int -> Either Int Int
+readerException n = runExcept $ runReaderT go n
+  where
+    go = do
+        x <- ask
+        if x == 0
+            then throwError x
+            else local (subtract 1) go

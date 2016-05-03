@@ -78,10 +78,18 @@ readerReader n = run $ runReader (S1 n) $ runReader (S2 n) go
 readerWriter :: Int -> Int
 readerWriter n = getSum $ snd $ run $ runWriterStrict $ runReader n go
   where
-    go :: (MonadReader Int m, MonadLocal Int m, MonadWriter (Sum Int) m) => m Int
     go = do
         x <- ask
         tell (Sum x)
-        if x == 0
+        if x == (0 :: Int)
             then return x
+            else local (subtract (1 :: Int)) go
+
+readerException :: Int -> Either Int Int
+readerException n = run $ runExcept $ runReader n go
+  where
+    go = do
+        x <- ask
+        if x == (0 :: Int)
+            then throw x
             else local (subtract (1 :: Int)) go
