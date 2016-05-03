@@ -2,6 +2,7 @@
 
 module Mtl.Cross where
 
+import           Control.Arrow (first)
 import           Control.Monad.Except
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict
@@ -99,3 +100,7 @@ writerState n = getSum $ snd $ flip evalState n $ runWriterT stateWriterInner
 
 writerReader :: Int -> Int
 writerReader n = getSum $ snd $ flip runReader n $ runWriterT readerWriterInner
+
+writerWriter :: Int -> (Int, [Int])
+writerWriter n = first (getSum . snd) $ runWriter $ runWriterT $
+    replicateM_ n (tell (Sum (1 :: Int)) >> lift (tell [1 :: Int]))

@@ -2,6 +2,8 @@
 
 module Classes.Cross where
 
+import           Control.Arrow (first)
+import           Control.Monad (replicateM_)
 import           Control.Monad.Classes
 import           Control.Monad.Classes.Run
 import           Data.Monoid
@@ -105,3 +107,7 @@ writerState n =
 writerReader :: Int -> Int
 writerReader n =
     getSum $ snd $ run $ runReader n $ runWriterStrict readerWriterInner
+
+writerWriter :: Int -> (Int, [Int])
+writerWriter n = first (getSum . snd) $ run $ runWriterStrict $ runWriterStrict $
+    replicateM_ n (tell (Sum (1 :: Int)) >> tell [1 :: Int])

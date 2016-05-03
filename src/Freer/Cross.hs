@@ -2,6 +2,8 @@
 
 module Freer.Cross where
 
+import           Control.Arrow (first)
+import           Control.Monad (replicateM_)
 import           Control.Monad.Freer
 import           Control.Monad.Freer.Exception
 import           Control.Monad.Freer.Reader
@@ -105,3 +107,7 @@ writerState n =
 writerReader :: Int -> Int
 writerReader n =
     getSum $ snd $ run $ flip runReader n $ runWriter readerWriterInner
+
+writerWriter :: Int -> (Int, [Int])
+writerWriter n = first (getSum . snd) $ run $ runWriter $ runWriter $
+    replicateM_ n (tell (Sum (1 :: Int)) >> tell [1 :: Int])
