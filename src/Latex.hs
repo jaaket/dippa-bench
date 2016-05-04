@@ -17,11 +17,20 @@ exportTable :: BenchGroup Report -> T.Text
 exportTable = render . resultsToLatex
 
 resultsToLatex :: BenchGroup Report -> LaTeX
-resultsToLatex group = tabular Nothing tableSpec table
+resultsToLatex group =
+    tableEnv $
+           centering
+        <> tableLabel
+        <> tableCaption
+        <> tabular Nothing tableSpec table
   where
-    tableSpec = [CenterColumn, VerticalLine] ++ replicate numBenches CenterColumn
+    tableSpec = [CenterColumn, VerticalLine] ++ replicate numBenches LeftColumn
 
     numBenches = length (bgBenches group)
+
+    tableLabel = label (fromString (T.unpack (bgId group)))
+
+    tableCaption = caption (fromString (T.unpack (bgDescription group)))
 
     table = toprule <> header <> lnbk <> midrule <> body <> lnbk <> bottomrule
 
@@ -46,3 +55,9 @@ midrule = fromLaTeX (TeXCommS "midrule")
 
 bottomrule :: LaTeXC l => l
 bottomrule = fromLaTeX (TeXCommS "bottomrule")
+
+centering :: LaTeXC l => l
+centering = fromLaTeX (TeXCommS "centering")
+
+tableEnv :: LaTeXC l => l -> l
+tableEnv = liftL (TeXEnv "table" [OptArg (fromString "H")])
