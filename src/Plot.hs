@@ -5,6 +5,8 @@ module Plot where
 import           Criterion.Types                        (Report (..))
 import           Control.Arrow                          (second)
 import qualified Control.Monad.State                    as State
+import           Data.Function (on)
+import           Data.List (sortBy)
 import qualified Data.Text                              as T
 import qualified Data.Colour.SRGB                       as Colour
 import           Graphics.Rendering.Chart.Easy
@@ -39,7 +41,9 @@ plotBench bench = do
 
 plotBenchGroup group = toRenderable layout
   where
-    plots = State.evalState (mapM plotBench (bgBenches group)) (newCycle styles)
+    sortedBenches = sortBy (compare `on` benchDescription) (bgBenches group)
+
+    plots = State.evalState (mapM plotBench sortedBenches) (newCycle styles)
 
     xAxisName = T.unpack (bgXAxisName group)
 
