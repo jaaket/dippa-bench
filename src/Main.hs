@@ -38,14 +38,12 @@ import qualified Classes.Cross                          as Classes
 import qualified Classes.Exception                      as Classes
 import qualified Classes.Reader                         as Classes
 import qualified Classes.State                          as Classes
-import qualified Classes.StateWriter                    as Classes
 import qualified Classes.Writer                         as Classes
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Cross                            as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.Reader                           as Freer
 import qualified Freer.State                            as Freer
-import qualified Freer.StateWriter                      as Freer
 import qualified Freer.Writer                           as Freer
 import           Latex
 import qualified Mtl.Countdown                          as Mtl
@@ -53,7 +51,6 @@ import qualified Mtl.Cross                              as Mtl
 import qualified Mtl.Exception                          as Mtl
 import qualified Mtl.Reader                             as Mtl
 import qualified Mtl.State                              as Mtl
-import qualified Mtl.StateWriter                        as Mtl
 import qualified Mtl.Writer                             as Mtl
 import           Plot
 
@@ -174,30 +171,6 @@ benchmarks = [
                 ("monad-classes", Classes.repeatedTell)
               , ("freer", Freer.repeatedTell)
               , ("mtl", Mtl.repeatedTell)
-              ]
-        , bgXAxisName = "# of iterations"
-        }
-
-    , BenchGroup {
-          bgId = "was"
-        , bgDescription = "countdown + writer, writer above state"
-        , bgBenches = genBenches (steps (10^3) (10^3) 5)
-              [
-                ("monad-classes", Classes.countdownWriterAbove)
-              , ("freer", Freer.countdownWriterAbove)
-              , ("mtl", Mtl.countdownWriterAbove)
-              ]
-        , bgXAxisName = "# of iterations"
-        }
-
-    , BenchGroup {
-          bgId = "wbs"
-        , bgDescription = "countdown + writer, writer below state"
-        , bgBenches = genBenches (steps (10^3) (10^3) 5)
-              [
-                ("monad-classes", Classes.countdownWriterBelow)
-              , ("freer", Freer.countdownWriterBelow)
-              , ("mtl", Mtl.countdownWriterBelow)
               ]
         , bgXAxisName = "# of iterations"
         }
