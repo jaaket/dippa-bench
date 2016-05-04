@@ -3,6 +3,9 @@ module Latex where
 import           Criterion.Types        (Report (..))
 import           Data.List              (intersperse, transpose)
 import qualified Data.Text              as T
+import qualified Data.Text.Format       as Format
+import qualified Data.Text.Lazy         as LT
+import qualified Data.Text.Lazy.Builder as T
 import           Text.LaTeX
 import           Text.LaTeX.Base.Class
 import           Text.LaTeX.Base.Syntax
@@ -29,7 +32,7 @@ resultsToLatex group = tabular Nothing tableSpec table
 
     rowToLatex :: [Double] -> LaTeX
     rowToLatex (hd:tl) = foldr1 (&) $
-        fromString (show hd) : map (fromString . show) tl
+        fromString (show hd) : map (fromString . T.unpack . LT.toStrict . T.toLazyText . Format.prec 3) tl
 
     rows = transpose (xValues : map (map snd . benchData . fmap getMean) (bgBenches group))
 
