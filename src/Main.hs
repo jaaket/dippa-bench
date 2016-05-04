@@ -220,17 +220,17 @@ parseDeclaration (BenchDecl name desc magnitude fwsAndFuns) = BenchGroup {
 
 crossBenchDeclarations :: [BenchDecl]
 crossBenchDeclarations = [
-      BenchDecl "ss" "State above state" (10^7) [
+      BenchDecl "ss" "State above state" (10^6) [
           ("freer", Freer.stateState)
         , ("monad-classes", Classes.stateState)
         , ("mtl", Mtl.stateState)
         ]
-    , BenchDecl "sr" "State above reader" (10^7) [
+    , BenchDecl "sr" "State above reader" (10^6) [
           ("freer", Freer.stateReader)
         , ("monad-classes", Classes.stateReader)
         , ("mtl", Mtl.stateReader)
         ]
-    , BenchDecl "sw" "State above writer" (10^7) [
+    , BenchDecl "sw" "State above writer" (10^6) [
           ("freer", Freer.stateWriter)
         , ("monad-classes", Classes.stateWriter)
         , ("mtl", Mtl.stateWriter)
@@ -275,22 +275,22 @@ crossBenchDeclarations = [
         , ("monad-classes", Classes.writerWriter)
         , ("mtl", Mtl.writerWriter)
         ]
-    , BenchDecl "we" "Writer above exception" (10^3) [
+    , BenchDecl "we" "Writer above exception" (10^7) [
           ("freer", Freer.writerException)
         , ("monad-classes", Classes.writerException)
         , ("mtl", Mtl.writerException)
         ]
-    , BenchDecl "es" "Exception above state" (10^7) [
+    , BenchDecl "es" "Exception above state" (10^6) [
           ("freer", Freer.exceptionState)
         , ("monad-classes", Classes.exceptionState)
         , ("mtl", Mtl.exceptionState)
         ]
-    , BenchDecl "er" "Exception above reader" (10^7) [
+    , BenchDecl "er" "Exception above reader" (10^6) [
           ("freer", Freer.exceptionReader)
         , ("monad-classes", Classes.exceptionReader)
         , ("mtl", Mtl.exceptionReader)
         ]
-    , BenchDecl "ew" "Exception above writer" (10^7) [
+    , BenchDecl "ew" "Exception above writer" (10^6) [
           ("freer", Freer.exceptionWriter)
         , ("monad-classes", Classes.exceptionWriter)
         , ("mtl", Mtl.exceptionWriter)
