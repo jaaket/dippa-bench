@@ -48,6 +48,7 @@ import qualified Freer.Reader                           as Freer
 import qualified Freer.State                            as Freer
 import qualified Freer.StateWriter                      as Freer
 import qualified Freer.Writer                           as Freer
+import           Latex
 import qualified Mtl.Countdown                          as Mtl
 import qualified Mtl.Cross                              as Mtl
 import qualified Mtl.Exception                          as Mtl
@@ -321,6 +322,7 @@ data Options =
         , fw       :: [T.Text]
         }
     | Plot FilePath
+    | Latex FilePath
     deriving (Generic, Show)
 
 instance Opts.ParseRecord Options
@@ -431,3 +433,8 @@ main = do
                     filename
                     (plotBenchGroup group)
                 ) results
+
+        Latex path -> do
+            file <- B.readFile path
+            let results = Bin.decode file :: [BenchGroup Report]
+            mapM_ (putStrLn . T.unpack . exportTable) results

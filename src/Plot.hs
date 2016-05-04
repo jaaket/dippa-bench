@@ -2,9 +2,7 @@
 
 module Plot where
 
-import           Criterion.Types                        (Report (..),
-                                                         SampleAnalysis (..))
-import           Statistics.Resampling.Bootstrap        (Estimate (..))
+import           Criterion.Types                        (Report (..))
 import           Control.Arrow                          (second)
 import qualified Control.Monad.State                    as State
 import qualified Data.Text                              as T
@@ -14,9 +12,6 @@ import           Graphics.Rendering.Chart.Utils (isValidNumber)
 
 import Bench
 
-
-getMean :: Report -> Double
-getMean = estPoint . anMean . reportAnalysis
 
 getPoints :: Bench Report -> [(Double, Double)]
 getPoints = map (second getMean) . benchData

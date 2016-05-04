@@ -6,12 +6,13 @@
 module Bench where
 
 import           Criterion
-import           Criterion.Types (Report (..))
-import qualified Data.Binary     as Bin
-import           Data.Monoid     ((<>))
-import qualified Data.Text       as T
-import           GHC.Generics    (Generic)
-
+import           Criterion.Types                 (Report (..),
+                                                  SampleAnalysis (..))
+import qualified Data.Binary                     as Bin
+import           Data.Monoid                     ((<>))
+import qualified Data.Text                       as T
+import           GHC.Generics                    (Generic)
+import           Statistics.Resampling.Bootstrap (Estimate (..))
 
 
 data Bench a = Bench {
@@ -42,3 +43,6 @@ describeAndRun :: Bench Benchmarkable -> IO (Bench Report)
 describeAndRun bench = do
     putStrLn $ "Running benchmark: " <> T.unpack (benchDescription bench)
     mapM benchmark' bench
+
+getMean :: Report -> Double
+getMean = estPoint . anMean . reportAnalysis
