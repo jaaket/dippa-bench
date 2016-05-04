@@ -43,7 +43,6 @@ import qualified Classes.Writer                         as Classes
 import qualified Freer.Countdown                        as Freer
 import qualified Freer.Cross                            as Freer
 import qualified Freer.Exception                        as Freer
-import qualified Freer.NQueens                          as Freer
 import qualified Freer.Reader                           as Freer
 import qualified Freer.State                            as Freer
 import qualified Freer.StateWriter                      as Freer
@@ -52,7 +51,6 @@ import           Latex
 import qualified Mtl.Countdown                          as Mtl
 import qualified Mtl.Cross                              as Mtl
 import qualified Mtl.Exception                          as Mtl
-import qualified Mtl.NQueens                            as Mtl
 import qualified Mtl.Reader                             as Mtl
 import qualified Mtl.State                              as Mtl
 import qualified Mtl.StateWriter                        as Mtl
@@ -154,17 +152,6 @@ benchmarks = [
               , ("mtl", Mtl.exception)
               ]
         , bgXAxisName = "# of iterations"
-        }
-
-    , BenchGroup {
-          bgId = "nq"
-        , bgDescription = "n-queens"
-        , bgBenches = genBenches [6..10]
-              [
-                ("freer", Freer.nQueens)
-              , ("mtl", Mtl.nQueens)
-              ]
-        , bgXAxisName = "n"
         }
 
     , BenchGroup {
