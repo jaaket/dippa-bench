@@ -72,7 +72,7 @@ benchmarks :: [BenchGroup Benchmarkable]
 benchmarks = [
       BenchGroup {
             bgId = "cd"
-          , bgDescription = "countdown"
+          , bgDescription = "State"
           , bgBenches = genBenches (steps (10^6) (10^6) 5)
                 [
                   ("monad-classes", Classes.countdown)
@@ -84,7 +84,7 @@ benchmarks = [
 
     , BenchGroup {
         bgId = "ras"
-      , bgDescription = "readers above state"
+      , bgDescription = "Stack of readers above state"
       , bgBenches = (\n ->
           [
             Bench "mtl" (zip [1..5] [
@@ -114,7 +114,7 @@ benchmarks = [
 
     , BenchGroup {
           bgId = "rbs"
-        , bgDescription = "readers below state"
+        , bgDescription = "Stack of readers below state"
         , bgBenches = (\n ->
             [
               Bench "mtl" (zip [1..5] [
@@ -144,7 +144,7 @@ benchmarks = [
 
     , BenchGroup {
           bgId = "exc"
-        , bgDescription = "exception"
+        , bgDescription = "Exception"
         , bgBenches = genBenches (steps (10^6) (10^6) 5)
               [
                 ("monad-classes", Classes.exception)
@@ -156,7 +156,7 @@ benchmarks = [
 
     , BenchGroup {
           bgId = "cdr"
-        , bgDescription = "countdownReader"
+        , bgDescription = "Reader"
         , bgBenches = genBenches (steps (10^6) (10^6) 5)
               [
                 ("monad-classes", Classes.countdownReader)
@@ -168,7 +168,7 @@ benchmarks = [
 
     , BenchGroup {
           bgId = "rt"
-        , bgDescription = "repeatedTell"
+        , bgDescription = "Writer"
         , bgBenches = genBenches (steps (10^5) (10^5) 5)
               [
                 ("monad-classes", Classes.repeatedTell)
