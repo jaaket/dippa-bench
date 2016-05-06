@@ -84,27 +84,7 @@ benchmarks = [
       , bgDescription = "Stack of readers above state"
       , bgBenches = (\n ->
           [
-            Bench "mtl" (zip [1..5] [
-                  whnf Mtl.readersAboveState1 n
-                , whnf Mtl.readersAboveState2 n
-                , whnf Mtl.readersAboveState3 n
-                , whnf Mtl.readersAboveState4 n
-                , whnf Mtl.readersAboveState5 n
-                ])
-          , Bench "freer" (zip [1..5] [
-                whnf Freer.readersAboveState1 n
-              , whnf Freer.readersAboveState2 n
-              , whnf Freer.readersAboveState3 n
-              , whnf Freer.readersAboveState4 n
-              , whnf Freer.readersAboveState5 n
-              ])
-          , Bench "monad-classes" (zip [1..5] [
-                whnf Classes.readersAboveState1 n
-              , whnf Classes.readersAboveState2 n
-              , whnf Classes.readersAboveState3 n
-              , whnf Classes.readersAboveState4 n
-              , whnf Classes.readersAboveState5 n
-              ])
+            Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) [1..10])
           ]) (10^6)
       , bgXAxisName = "# of Reader layers above State"
       }
@@ -114,27 +94,7 @@ benchmarks = [
         , bgDescription = "Stack of readers below state"
         , bgBenches = (\n ->
             [
-              Bench "mtl" (zip [1..5] [
-                    whnf Mtl.readersBelowState1 n
-                  , whnf Mtl.readersBelowState2 n
-                  , whnf Mtl.readersBelowState3 n
-                  , whnf Mtl.readersBelowState4 n
-                  , whnf Mtl.readersBelowState5 n
-                  ])
-            , Bench "freer" (zip [1..5] [
-                  whnf Freer.readersBelowState1 n
-                , whnf Freer.readersBelowState2 n
-                , whnf Freer.readersBelowState3 n
-                , whnf Freer.readersBelowState4 n
-                , whnf Freer.readersBelowState5 n
-                ])
-            , Bench "monad-classes" (zip [1..5] [
-                  whnf Classes.readersBelowState1 n
-                , whnf Classes.readersBelowState2 n
-                , whnf Classes.readersBelowState3 n
-                , whnf Classes.readersBelowState4 n
-                , whnf Classes.readersBelowState5 n
-                ])
+              Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) [1..10])
             ]) (10^6)
         , bgXAxisName = "# of Reader layers below State"
         }

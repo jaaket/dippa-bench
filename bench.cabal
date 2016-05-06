@@ -49,6 +49,7 @@ executable bench
                      , Mtl.NQueens
                      , Mtl.Reader
                      , Mtl.State
+                     , Mtl.StateTH
                      , Mtl.StateWriter
                      , Mtl.Writer
                      , Plot
@@ -79,3 +80,4 @@ executable bench
                      , deepseq
                      , HaTeX
                      , text-format
+                     , template-haskell
