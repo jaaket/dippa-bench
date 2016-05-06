@@ -82,20 +82,22 @@ benchmarks = [
     , BenchGroup {
         bgId = "ras"
       , bgDescription = "Stack of readers above state"
-      , bgBenches = (\n ->
+      , bgBenches = (\n ks ->
           [
-            Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) [1..10])
-          ]) (10^6)
+            Bench "freer" (map (\k -> (k, whnf (Freer.readersAboveState k) n)) ks)
+          , Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) ks)
+          ]) (10^6) [1..10]
       , bgXAxisName = "# of Reader layers above State"
       }
 
     , BenchGroup {
           bgId = "rbs"
         , bgDescription = "Stack of readers below state"
-        , bgBenches = (\n ->
+        , bgBenches = (\n ks ->
             [
-              Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) [1..10])
-            ]) (10^6)
+              Bench "freer" (map (\k -> (k, whnf (Freer.readersBelowState k) n)) ks)
+            , Bench "mtl" (map (\k -> (k, whnf (Mtl.readersBelowState k) n)) ks)
+            ]) (10^6) [1..10]
         , bgXAxisName = "# of Reader layers below State"
         }
 
