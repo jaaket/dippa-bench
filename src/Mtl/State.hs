@@ -28,11 +28,13 @@ readersAboveState3 =
     innerComputation
 readersAboveState4 =
     flip runState 0 .
-    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReaderT 0 .
     innerComputation
 readersAboveState5 =
     flip runState 0 .
-    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReaderT 0 . flip runReaderT 0 .
     innerComputation
 
 readersBelowState1 =
@@ -48,10 +50,12 @@ readersBelowState3 =
     flip runStateT 0 .
     innerComputation
 readersBelowState4 =
-    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReaderT 0 .
     flip runStateT 0 .
     innerComputation
 readersBelowState5 =
-    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReader 0 . flip runReaderT 0 . flip runReaderT 0 .
+    flip runReaderT 0 . flip runReaderT 0 .
     flip runStateT 0 .
     innerComputation

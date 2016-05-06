@@ -39,7 +39,8 @@ readersAboveState4 =
 readersAboveState5 =
     run .
     flip runState (0 :: Int) .
-    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runReader 0 .
     innerComputation
 
 readersBelowState1 =
@@ -64,6 +65,7 @@ readersBelowState4 =
     innerComputation
 readersBelowState5 =
     run .
-    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
+    flip runReader 0 .
     flip runState (0 :: Int) .
     innerComputation
