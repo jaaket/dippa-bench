@@ -16,8 +16,6 @@ innerComputation n = foldM f 1 [n,n-1..1] where
                             return $! max acc x
     f acc x = return $! max acc x
 
--- Just be explicit for clarity:
-
 readersAboveState1 =
     run .
     flip runState (0 :: Int) .
@@ -43,16 +41,6 @@ readersAboveState5 =
     flip runState (0 :: Int) .
     flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 . flip runReader 0 .
     innerComputation
-
--- This will enter an infinite loop for some reason.
--- Maybe the library has a hard time finding the state?
---
--- readersBelowState1 :: Int -> (Int, Int)
--- readersBelowState1 =
---     run .
---     flip runReader 0 .
---     flip runState 0 .
---     innerComputation
 
 readersBelowState1 =
     run .
