@@ -85,6 +85,7 @@ benchmarks = [
       , bgBenches = (\n ks ->
           [
             Bench "freer" (map (\k -> (k, whnf (Freer.readersAboveState k) n)) ks)
+          , Bench "monad-classes" (map (\k -> (k, whnf (Classes.readersAboveState k) n)) ks)
           , Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) ks)
           ]) (10^6) [1..10]
       , bgXAxisName = "# of Reader layers above State"
@@ -96,6 +97,7 @@ benchmarks = [
         , bgBenches = (\n ks ->
             [
               Bench "freer" (map (\k -> (k, whnf (Freer.readersBelowState k) n)) ks)
+            , Bench "monad-classes" (map (\k -> (k, whnf (Classes.readersBelowState k) n)) ks)
             , Bench "mtl" (map (\k -> (k, whnf (Mtl.readersBelowState k) n)) ks)
             ]) (10^6) [1..10]
         , bgXAxisName = "# of Reader layers below State"

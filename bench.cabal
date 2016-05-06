@@ -21,6 +21,7 @@ executable bench
                      , Classes.Exception
                      , Classes.Reader
                      , Classes.State
+                     , Classes.StateTH
                      , Classes.StateWriter
                      , Classes.Writer
                      , Common.ErrCode
