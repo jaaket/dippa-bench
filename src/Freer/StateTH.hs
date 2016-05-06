@@ -36,10 +36,10 @@ readersBelowStateClause n = clause
 
 genReadersAboveState :: Int -> Q [Dec]
 genReadersAboveState n = do
-    f <- funD (mkName "readersAboveState") (map readersAboveStateClause [1..n])
+    f <- funD (mkName "readersAboveState") (map readersAboveStateClause [0..n])
     return [f]
 
 genReadersBelowState :: Int -> Q [Dec]
 genReadersBelowState n = do
-    f <- funD (mkName "readersBelowState") (map readersBelowStateClause [1..n])
+    f <- funD (mkName "readersBelowState") (map readersBelowStateClause [0..n])
     return [f]
