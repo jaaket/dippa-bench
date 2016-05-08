@@ -20,18 +20,24 @@ innerComputation n = foldM f 1 [n,n-1..1] where
 
 genRunReaders :: Int -> Q Exp
 genRunReaders n =
-    foldr (`infixApp` [|(.)|]) [e|id|] (replicate n [|flip runReader 0|])
+    foldr (`infixApp` [|(.)|]) [|id|] (replicate n [|flip runReader 0|])
 
 readersAboveStateClause :: Int -> Q Clause
 readersAboveStateClause n = clause
     [litP (integerL (fromIntegral n))]
-    (normalB [e|run . flip runState (0 :: Int) . $(genRunReaders n) . innerComputation|])
+    (normalB [|run .
+               flip runState (0 :: Int) .
+               $(genRunReaders n) .
+               innerComputation|])
     []
 
 readersBelowStateClause :: Int -> Q Clause
 readersBelowStateClause n = clause
     [litP (integerL (fromIntegral n))]
-    (normalB [e|run . $(genRunReaders n) . flip runState (0 :: Int) . innerComputation|])
+    (normalB [|run .
+               $(genRunReaders n) .
+               flip runState (0 :: Int) .
+               innerComputation|])
     []
 
 genReadersAboveState :: Int -> Q [Dec]
