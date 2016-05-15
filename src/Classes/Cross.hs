@@ -26,17 +26,16 @@ stateState n = run $ evalStateStrict (S1 n) $ evalStateStrict (S2 n) go
                 else put (S2 (y - 1)) >> go
             else put (S1 (x - 1)) >> go
 
-newtype Env = Env { getEnv :: Int }
+stateReaderInner :: (MonadState Int m, MonadReader Int m) => m Int
+stateReaderInner = do
+    x <- get
+    y <- ask
+    if x == y
+        then return x
+        else put (x - 1) >> stateReaderInner
 
 stateReader :: Int -> Int
-stateReader n = run $ runReader (Env 0) $ evalStateStrict n go
-  where
-    go = do
-        x <- get
-        Env y <- ask
-        if x == y
-            then return x
-            else put (x - 1) >> go
+stateReader n = run $ runReader 0 $ evalStateStrict n stateReaderInner
 
 stateWriterInner :: (MonadState Int m, MonadWriter (Sum Int) m) => m Int
 stateWriterInner = do
@@ -61,14 +60,7 @@ stateException :: Int -> Either ErrCode Int
 stateException n = run $ runExcept $ evalStateStrict n stateExceptionInner
 
 readerState :: Int -> Int
-readerState n = run $ evalStateStrict n $ runReader (0 :: Int) go
-  where
-    go = do
-        x <- get
-        y <- ask
-        if x == y
-            then return x
-            else put (x - 1) >> go
+readerState n = run $ evalStateStrict n $ runReader (0 :: Int) stateReaderInner
 
 readerReader :: Int -> Int
 readerReader n = run $ runReader (S1 n) $ runReader (S2 n) go

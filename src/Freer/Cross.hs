@@ -29,15 +29,18 @@ stateState n = fst $ fst $ run $ flip runState (S1 n) $ runState go (S2 n)
                 else put (S2 (y - 1)) >> go
             else put (S1 (x - 1)) >> go
 
+stateReaderInner :: (Member (Reader Int) r, Member (State Int) r)
+                 => Eff r Int
+stateReaderInner = do
+    x <- get
+    y <- ask
+    if x == y
+        then return x
+        else put (x - 1 :: Int) >> stateReaderInner
+
 stateReader :: Int -> Int
-stateReader n = snd $ run $ flip runReader (0 :: Int) $ runState go n
-  where
-    go = do
-        x <- get
-        y <- ask
-        if x == y
-            then return x
-            else put (x - 1 :: Int) >> go
+stateReader n =
+    snd $ run $ flip runReader (0 :: Int) $ runState stateReaderInner n
 
 stateWriterInner :: (Member (State Int) r, Member (Writer (Sum Int)) r)
                  => Eff r Int
@@ -63,13 +66,8 @@ stateException :: Int -> Either ErrCode Int
 stateException n = fmap snd $ run $ runError $ runState stateExceptionInner n
 
 readerState :: Int -> Int
-readerState n = fst $ run $ flip runState n $ runReader go 0
-  where
-    go = do
-        x <- get
-        if x == 0
-            then return x
-            else put (x - 1) >> go
+readerState n =
+    fst $ run $ flip runState n $ runReader stateReaderInner (0 :: Int)
 
 readerReader :: Int -> Int
 readerReader n = run $ flip runReader (S1 n) $ runReader go (S2 n)

@@ -26,15 +26,16 @@ stateState n = flip evalState (S1 n) $ evalStateT go (S2 n)
                 else put (S2 (y - 1)) >> go
             else lift (put (S1 (x - 1))) >> go
 
+stateReaderInner :: (MonadState Int m, MonadReader Int m) => m Int
+stateReaderInner = do
+    x <- get
+    y <- ask
+    if x == y
+        then return x
+        else put (x - 1) >> stateReaderInner
+
 stateReader :: Int -> Int
-stateReader n = flip runReader 0 $ evalStateT go n
-  where
-    go = do
-        x <- get
-        y <- ask
-        if x == y
-            then return x
-            else put (x - 1) >> go
+stateReader n = flip runReader 0 $ evalStateT stateReaderInner n
 
 stateWriterInner :: (MonadState Int m, MonadWriter (Sum Int) m) => m Int
 stateWriterInner = do
@@ -58,13 +59,7 @@ stateException :: Int -> Either ErrCode Int
 stateException n = runExcept $ evalStateT stateExceptionInner n
 
 readerState :: Int -> Int
-readerState n = flip evalState n $ runReaderT go 0
-  where
-    go = do
-        x <- get
-        if x == 0
-            then return x
-            else put (x - 1) >> go
+readerState n = flip evalState n $ runReaderT stateReaderInner 0
 
 readerReader :: Int -> Int
 readerReader n = flip runReader (S1 n) $ runReaderT go (S2 n)
