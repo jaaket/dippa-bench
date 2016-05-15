@@ -120,9 +120,12 @@ writerExceptionInner n = do
     replicateM_ n (tell [1 :: Int])
     throw (ErrCode 0)
 
-writerException :: Int -> Either ErrCode [Int]
-writerException n =
-    run $ runExcept $ execWriterStrict $ writerExceptionInner n
+writerException :: Int -> Either ErrCode Int
+writerException n = fst <$> helper
+  where
+    -- GHC needs help choosing monoid instance
+    helper :: Either ErrCode (Int, [Int])
+    helper = run $ runExcept $ runWriterStrict $ writerExceptionInner n
 
 exceptionState :: Int -> Either ErrCode Int
 exceptionState n = run $ evalStateStrict n $ runExcept stateExceptionInner

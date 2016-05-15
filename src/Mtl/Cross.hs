@@ -110,8 +110,9 @@ writerExceptionInner n = do
     replicateM_ n (tell [1])
     throwError (ErrCode 0)
 
-writerException :: Int -> Either ErrCode [Int]
-writerException n = fmap snd $ runExcept $ runWriterT $ writerExceptionInner n
+writerException :: Int -> Either ErrCode Int
+writerException n =
+    fmap fst $ runExcept $ runWriterT $ writerExceptionInner n
 
 exceptionState :: Int -> Either ErrCode Int
 exceptionState n = flip evalState n $ runExceptT stateExceptionInner
