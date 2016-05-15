@@ -61,11 +61,11 @@ plotBenchGroup group = toRenderable layout
 
     styles = map ($ styleCommon) [
           (point_border_color .~ opaque (Colour.sRGB24read "e41a1c")) .
-          (point_shape .~ PointShapeCircle)
+          (point_shape .~ PointShapeCross)
         , (point_border_color .~ opaque (Colour.sRGB24read "377eb8")) .
-          (point_shape .~ PointShapePolygon 4 False)
+          (point_shape .~ PointShapePlus)
         , (point_border_color .~ opaque (Colour.sRGB24read "4daf4a")) .
-          (point_shape .~ PointShapePolygon 4 True)
+          (point_shape .~ PointShapeCircle)
         , (point_border_color .~ opaque (Colour.sRGB24read "984ea3")) .
           (point_shape .~ PointShapePolygon 3 False)
         , (point_border_color .~ opaque (Colour.sRGB24read "ff7f00")) .
