@@ -5,9 +5,13 @@ module Plot where
 import           Criterion.Types                        (Report (..))
 import           Control.Arrow                          (second)
 import qualified Control.Monad.State                    as State
-import           Data.Function (on)
-import           Data.List (sortBy)
+import           Data.Function                          (on)
+import           Data.List                              (sortBy)
 import qualified Data.Text                              as T
+import qualified Data.Text.Lazy                         as LT
+import           Data.Text.Lazy.Builder                 (toLazyText)
+import           Data.Text.Lazy.Builder.RealFloat       (formatRealFloat,
+                                                        FPFormat (..))
 import qualified Data.Colour.SRGB                       as Colour
 import           Graphics.Rendering.Chart.Easy
 import           Graphics.Rendering.Chart.Utils (isValidNumber)
@@ -51,12 +55,12 @@ plotBenchGroup group = toRenderable layout
            $ layout_x_axis . laxis_title .~ xAxisName
            $ layout_x_axis . laxis_generate .~ autoScaledPaddedAxis 0.1 def
            $ layout_y_axis . laxis_title .~ "time (s)"
-           $ layout_all_font_styles %~ ((font_size .~ 20) . (font_name .~ "Gill Sans"))
+           $ layout_all_font_styles %~ ((font_size .~ 40) . (font_name .~ "Gill Sans"))
            $ def
 
-    styleCommon = point_radius .~ 7
+    styleCommon = point_radius .~ 10
                 $ point_color .~ transparent
-                $ point_border_width .~ 2
+                $ point_border_width .~ 3
                 $ def
 
     styles = map ($ styleCommon) [
@@ -73,8 +77,10 @@ plotBenchGroup group = toRenderable layout
         ]
 
     autoScaledPaddedAxis :: RealFloat a => a -> LinearAxisParams a -> AxisFn a
-    autoScaledPaddedAxis padding lap ps0 = scaledAxis lap rs ps
+    autoScaledPaddedAxis padding lap ps0 = scaledAxis lapShorterLabels rs ps
       where
         ps = filter isValidNumber ps0
         width = maximum ps - minimum ps
         rs = (minimum ps - padding * width, maximum ps + padding * width)
+        lapShorterLabels = lap & la_labelf .~
+            LT.unpack . toLazyText . formatRealFloat Exponent (Just 1)
