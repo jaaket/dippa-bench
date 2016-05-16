@@ -20,15 +20,15 @@ resultsToLatex :: BenchGroup Report -> LaTeX
 resultsToLatex group =
     tableEnv $
            centering
-        <> tableLabel
         <> tableCaption
+        <> tableLabel
         <> tabular Nothing tableSpec table
   where
     tableSpec = [CenterColumn, VerticalLine] ++ replicate numBenches LeftColumn
 
     numBenches = length (bgBenches group)
 
-    tableLabel = label (fromString (T.unpack (bgId group)))
+    tableLabel = label (fromString ("table:" ++ T.unpack (bgId group)))
 
     tableCaption = caption (fromString (T.unpack (bgDescription group)))
 
