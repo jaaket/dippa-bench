@@ -102,7 +102,7 @@ writerReader n = getSum $ snd $ flip runReader n $ runWriterT readerWriterInner
 
 writerWriter :: Int -> (Int, [Int])
 writerWriter n = first (getSum . snd) $ runWriter $ runWriterT $
-    replicateM_ n (tell (Sum (1 :: Int)) >> lift (tell [1 :: Int]))
+    replicateM_ n (tell (Sum 1) >> lift (tell [1]))
 
 writerExceptionInner :: (MonadWriter [Int] m, MonadError ErrCode m)
                      => Int -> m Int
