@@ -30,8 +30,8 @@ stateReaderInner :: (MonadState Int m, MonadReader Int m) => m Int
 stateReaderInner = do
     x <- get
     y <- ask
-    if x == y
-        then return x
+    if x == (0 :: Int)
+        then return y
         else put (x - 1) >> stateReaderInner
 
 stateReader :: Int -> Int

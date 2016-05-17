@@ -34,9 +34,9 @@ stateReaderInner :: (Member (Reader Int) r, Member (State Int) r)
 stateReaderInner = do
     x <- get
     y <- ask
-    if x == y
-        then return x
-        else put (x - 1 :: Int) >> stateReaderInner
+    if x == (0 :: Int)
+        then return y
+        else put (x - 1) >> stateReaderInner
 
 stateReader :: Int -> Int
 stateReader n =
