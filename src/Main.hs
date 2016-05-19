@@ -70,7 +70,7 @@ benchmarks = [
       BenchGroup {
             bgId = "cd"
           , bgDescription = "State"
-          , bgBenches = genBenches (steps (10^6) (10^6) 5)
+          , bgBenches = genBenches (steps (10^6) (10^6) 10)
                 [
                   ("monad-classes", Classes.countdown)
                 , ("freer", Freer.countdown)
@@ -106,7 +106,7 @@ benchmarks = [
     , BenchGroup {
           bgId = "exc"
         , bgDescription = "Exception"
-        , bgBenches = genBenches (steps (10^8) (10^8) 5)
+        , bgBenches = genBenches (steps (10^8) (10^8) 10)
               [
                 ("monad-classes", Classes.exception)
               , ("freer", Freer.exception)
@@ -118,7 +118,7 @@ benchmarks = [
     , BenchGroup {
           bgId = "cdr"
         , bgDescription = "Reader"
-        , bgBenches = genBenches (steps (10^6) (10^6) 5)
+        , bgBenches = genBenches (steps (10^6) (10^6) 10)
               [
                 ("monad-classes", Classes.countdownReader)
               , ("freer", Freer.countdownReader)
@@ -130,7 +130,7 @@ benchmarks = [
     , BenchGroup {
           bgId = "rt"
         , bgDescription = "Writer"
-        , bgBenches = genBenches (steps (10^5) (10^5) 5)
+        , bgBenches = genBenches (steps (10^5) (10^5) 10)
               [
                 ("monad-classes", Classes.repeatedTell)
               , ("freer", Freer.repeatedTell)
@@ -151,7 +151,7 @@ parseDeclaration :: BenchDecl -> BenchGroup Benchmarkable
 parseDeclaration (BenchDecl name desc magnitude fwsAndFuns) = BenchGroup {
       bgId = name
     , bgDescription = desc
-    , bgBenches = genBenches (steps magnitude magnitude 5) fwsAndFuns
+    , bgBenches = genBenches (steps magnitude magnitude 10) fwsAndFuns
     , bgXAxisName = "# of iterations"
     }
 
