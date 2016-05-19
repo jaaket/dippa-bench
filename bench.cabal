@@ -56,7 +56,7 @@ executable bench
                      , Mtl.Writer
                      , Plot
   default-language:    Haskell2010
-  ghc-options:         -W -O2
+  ghc-options:         -W -O2 -threaded
   build-depends:       base >= 4.7 && < 5
                      , criterion
                      , mtl
