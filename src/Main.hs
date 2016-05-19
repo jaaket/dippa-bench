@@ -106,7 +106,7 @@ benchmarks = [
     , BenchGroup {
           bgId = "exc"
         , bgDescription = "Exception"
-        , bgBenches = genBenches (steps (10^6) (10^6) 5)
+        , bgBenches = genBenches (steps (10^8) (10^8) 5)
               [
                 ("monad-classes", Classes.exception)
               , ("freer", Freer.exception)
@@ -162,7 +162,7 @@ crossBenchDeclarations = [
         , ("monad-classes", Classes.stateState)
         , ("mtl", Mtl.stateState)
         ]
-    , BenchDecl "sr" "State above reader" (10^6) [
+    , BenchDecl "sr" "State above reader" (10^7) [
           ("freer", Freer.stateReader)
         , ("monad-classes", Classes.stateReader)
         , ("mtl", Mtl.stateReader)
@@ -212,12 +212,12 @@ crossBenchDeclarations = [
         , ("monad-classes", Classes.writerWriter)
         , ("mtl", Mtl.writerWriter)
         ]
-    , BenchDecl "we" "Writer above exception" (10^7) [
+    , BenchDecl "we" "Writer above exception" (10^6) [
           ("freer", Freer.writerException)
         , ("monad-classes", Classes.writerException)
         , ("mtl", Mtl.writerException)
         ]
-    , BenchDecl "es" "Exception above state" (10^6) [
+    , BenchDecl "es" "Exception above state" (10^7) [
           ("freer", Freer.exceptionState)
         , ("monad-classes", Classes.exceptionState)
         , ("mtl", Mtl.exceptionState)
