@@ -20,7 +20,7 @@ import Bench
 
 
 getPoints :: Bench Report -> [(Double, Double)]
-getPoints = map (second getMean) . benchData
+getPoints = map (second getOLS) . benchData
 
 data Cycle a = Cycle { cycleValues :: [a], cycleCurrent :: Int }
 

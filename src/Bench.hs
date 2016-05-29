@@ -6,9 +6,11 @@
 module Bench where
 
 import           Criterion
-import           Criterion.Types                 (Report (..),
+import           Criterion.Types                 (Regression (..), Report (..),
                                                   SampleAnalysis (..))
 import qualified Data.Binary                     as Bin
+import qualified Data.Map.Lazy                   as Map
+import           Data.Maybe                      (fromJust)
 import           Data.Monoid                     ((<>))
 import qualified Data.Text                       as T
 import           GHC.Generics                    (Generic)
@@ -43,6 +45,9 @@ describeAndRun :: Bench Benchmarkable -> IO (Bench Report)
 describeAndRun bench = do
     putStrLn $ "Running benchmark: " <> T.unpack (benchDescription bench)
     mapM benchmark' bench
+
+getOLS :: Report -> Double
+getOLS = estPoint . fromJust . Map.lookup "iters" . regCoeffs . head . anRegress . reportAnalysis
 
 getMean :: Report -> Double
 getMean = estPoint . anMean . reportAnalysis
