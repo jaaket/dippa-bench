@@ -1,5 +1,6 @@
 module Latex where
 
+import           Control.Lens           (ix, view, (^.), (^?!))
 import           Criterion.Types        (Report (..))
 import           Data.List              (intersperse, transpose)
 import qualified Data.Text              as T
@@ -26,16 +27,16 @@ resultsToLatex group =
   where
     tableSpec = [CenterColumn, VerticalLine] ++ replicate numBenches LeftColumn
 
-    numBenches = length (bgBenches group)
+    numBenches = length (group ^. bgBenches)
 
-    tableLabel = label (fromString ("table:" ++ T.unpack (bgId group)))
+    tableLabel = label (fromString ("table:" ++ T.unpack (group ^. bgId)))
 
-    tableCaption = caption (fromString (T.unpack (bgDescription group)))
+    tableCaption = caption (fromString (T.unpack (group ^. bgDescription)))
 
     table = toprule <> header <> lnbk <> midrule <> body <> lnbk <> bottomrule
 
-    header = fromString (T.unpack $ bgXAxisName group)
-           & foldr1 (&) (map (fromString . T.unpack . benchDescription) (bgBenches group))
+    header = fromString (T.unpack $ group ^. bgXAxisName)
+           & foldr1 (&) (map (fromString . T.unpack . view benchDescription) (group ^. bgBenches))
 
     body = foldr1 (<>) (intersperse lnbk (map rowToLatex rows))
 
@@ -43,9 +44,9 @@ resultsToLatex group =
     rowToLatex (hd:tl) = foldr1 (&) $
         fromString (show hd) : map (fromString . T.unpack . LT.toStrict . T.toLazyText . Format.prec 3) tl
 
-    rows = transpose (xValues : map (map snd . benchData . fmap getMean) (bgBenches group))
+    rows = transpose (xValues : map (map snd . view benchData . fmap getMean) (group ^. bgBenches))
 
-    xValues = map fst (benchData (head (bgBenches group)))
+    xValues = fmap fst $ group ^?! bgBenches . ix 0 . benchData
 
 toprule :: LaTeXC l => l
 toprule = fromLaTeX (TeXCommS "toprule")

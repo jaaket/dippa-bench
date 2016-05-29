@@ -2,6 +2,7 @@
 
 module Plot where
 
+import Control.Lens
 import           Criterion.Types                        (Report (..))
 import           Control.Arrow                          (second)
 import qualified Control.Monad.State                    as State
@@ -20,7 +21,7 @@ import Bench
 
 
 getPoints :: Bench Report -> [(Double, Double)]
-getPoints = map (second getOLS) . benchData
+getPoints = map (second getOLS) . view benchData
 
 data Cycle a = Cycle { cycleValues :: [a], cycleCurrent :: Int }
 
@@ -41,15 +42,15 @@ plotBench bench = do
            $ plot_points_style .~ style
            $ def
   where
-    title = T.unpack (benchDescription bench)
+    title = T.unpack (bench ^. benchDescription)
 
 plotBenchGroup group = toRenderable layout
   where
-    sortedBenches = sortBy (compare `on` benchDescription) (bgBenches group)
+    sortedBenches = sortBy (compare `on` view benchDescription) (group ^. bgBenches)
 
     plots = State.evalState (mapM plotBench sortedBenches) (newCycle styles)
 
-    xAxisName = T.unpack (bgXAxisName group)
+    xAxisName = T.unpack (group ^. bgXAxisName)
 
     layout = layout_plots .~ map toPlot plots
            $ layout_x_axis . laxis_title .~ xAxisName

@@ -9,7 +9,8 @@ module Main where
 
 import           Control.Arrow                          ((&&&))
 import           Control.Exception                      (bracket)
-import           Control.Lens                           ((&), (.~))
+import           Control.Lens                           (toListOf, view, (%~),
+                                                         (&), (.~), (^.), (^..))
 import           Control.Monad                          (when)
 import           Control.Monad.Par.Class                (NFData)
 import           Criterion
@@ -68,75 +69,75 @@ genBenches xValues = map mkBench
 benchmarks :: [BenchGroup Benchmarkable]
 benchmarks = [
       BenchGroup {
-            bgId = "cd"
-          , bgDescription = "State"
-          , bgBenches = genBenches (steps (10^6) (10^6) 10)
+            _bgId = "cd"
+          , _bgDescription = "State"
+          , _bgBenches = genBenches (steps (10^6) (10^6) 10)
                 [
                   ("monad-classes", Classes.countdown)
                 , ("freer", Freer.countdown)
                 , ("mtl", Mtl.countdown)
                 ]
-          , bgXAxisName = "# of iterations"
+          , _bgXAxisName = "# of iterations"
       }
 
     , BenchGroup {
-        bgId = "ras"
-      , bgDescription = "Stack of readers above state"
-      , bgBenches = (\n ks ->
+        _bgId = "ras"
+      , _bgDescription = "Stack of readers above state"
+      , _bgBenches = (\n ks ->
           [
             Bench "freer" (map (\k -> (k, whnf (Freer.readersAboveState k) n)) ks)
           , Bench "monad-classes" (map (\k -> (k, whnf (Classes.readersAboveState k) n)) ks)
           , Bench "mtl" (map (\k -> (k, whnf (Mtl.readersAboveState k) n)) ks)
           ]) (10^6) [0..10]
-      , bgXAxisName = "# of Reader layers above State"
+      , _bgXAxisName = "# of Reader layers above State"
       }
 
     , BenchGroup {
-          bgId = "rbs"
-        , bgDescription = "Stack of readers below state"
-        , bgBenches = (\n ks ->
+          _bgId = "rbs"
+        , _bgDescription = "Stack of readers below state"
+        , _bgBenches = (\n ks ->
             [
               Bench "freer" (map (\k -> (k, whnf (Freer.readersBelowState k) n)) ks)
             , Bench "monad-classes" (map (\k -> (k, whnf (Classes.readersBelowState k) n)) ks)
             , Bench "mtl" (map (\k -> (k, whnf (Mtl.readersBelowState k) n)) ks)
             ]) (10^6) [0..10]
-        , bgXAxisName = "# of Reader layers below State"
+        , _bgXAxisName = "# of Reader layers below State"
         }
 
     , BenchGroup {
-          bgId = "exc"
-        , bgDescription = "Exception"
-        , bgBenches = genBenches (steps (10^8) (10^8) 10)
+          _bgId = "exc"
+        , _bgDescription = "Exception"
+        , _bgBenches = genBenches (steps (10^8) (10^8) 10)
               [
                 ("monad-classes", Classes.exception)
               , ("freer", Freer.exception)
               , ("mtl", Mtl.exception)
               ]
-        , bgXAxisName = "# of iterations"
+        , _bgXAxisName = "# of iterations"
         }
 
     , BenchGroup {
-          bgId = "cdr"
-        , bgDescription = "Reader"
-        , bgBenches = genBenches (steps (10^6) (10^6) 10)
+          _bgId = "cdr"
+        , _bgDescription = "Reader"
+        , _bgBenches = genBenches (steps (10^6) (10^6) 10)
               [
                 ("monad-classes", Classes.countdownReader)
               , ("freer", Freer.countdownReader)
               , ("mtl", Mtl.countdownReader)
               ]
-        , bgXAxisName = "# of iterations"
+        , _bgXAxisName = "# of iterations"
         }
 
     , BenchGroup {
-          bgId = "rt"
-        , bgDescription = "Writer"
-        , bgBenches = genBenches (steps (10^5) (10^5) 10)
+          _bgId = "rt"
+        , _bgDescription = "Writer"
+        , _bgBenches = genBenches (steps (10^5) (10^5) 10)
               [
                 ("monad-classes", Classes.repeatedTell)
               , ("freer", Freer.repeatedTell)
               , ("mtl", Mtl.repeatedTell)
               ]
-        , bgXAxisName = "# of iterations"
+        , _bgXAxisName = "# of iterations"
         }
     ] ++ map parseDeclaration crossBenchDeclarations
 
@@ -149,10 +150,10 @@ data BenchDecl = forall a b. (Integral a, NFData b) => BenchDecl {
 
 parseDeclaration :: BenchDecl -> BenchGroup Benchmarkable
 parseDeclaration (BenchDecl name desc magnitude fwsAndFuns) = BenchGroup {
-      bgId = name
-    , bgDescription = desc
-    , bgBenches = genBenches (steps magnitude magnitude 10) fwsAndFuns
-    , bgXAxisName = "# of iterations"
+      _bgId = name
+    , _bgDescription = desc
+    , _bgBenches = genBenches (steps magnitude magnitude 10) fwsAndFuns
+    , _bgXAxisName = "# of iterations"
     }
 
 crossBenchDeclarations :: [BenchDecl]
@@ -253,7 +254,7 @@ data Options =
 instance Opts.ParseRecord Options
 
 ppBenchGroup :: BenchGroup a -> String
-ppBenchGroup group = T.unpack $ bgId group <> ": " <> bgDescription group
+ppBenchGroup group = T.unpack $ group ^. bgId <> ": " <> group ^. bgDescription
 
 aboutToBenchDescription :: [BenchGroup a] -> T.Text
 aboutToBenchDescription bgs =
@@ -265,7 +266,7 @@ aboutToBenchDescription bgs =
     headerIndentLength :: Int
     headerIndentLength = maximum (map T.length allFrameworks) + 1
 
-    bgsSortedById = sortBy (compare `on` bgId) bgs
+    bgsSortedById = sortBy (compare `on` view bgId) bgs
 
     header :: T.Text
     header = T.concat (map insertSpaceAfter headerItems)
@@ -274,7 +275,7 @@ aboutToBenchDescription bgs =
             item <> T.replicate (headerItemSpacing - T.length item) " "
 
     headerItems :: [T.Text] -- Benchmark group ids
-    headerItems = map bgId bgsSortedById
+    headerItems = map (view bgId) bgsSortedById
 
     headerItemSpacing = headerItemMaxLen + 3
 
@@ -293,11 +294,11 @@ aboutToBenchDescription bgs =
     benchesPresent :: T.Text -> [Bool]
     benchesPresent fwName = map (elem fwName . fwsInBench) bgsSortedById
       where
-        fwsInBench = map benchDescription . bgBenches
+        fwsInBench = toListOf (bgBenches . traverse . benchDescription)
 
     allFrameworks :: [T.Text]
     allFrameworks =
-        sort (nub (map benchDescription (concatMap bgBenches bgs)))
+        sort (nub (bgs ^.. traverse . bgBenches . traverse . benchDescription))
 
     displayBool :: Bool -> T.Text
     displayBool False = " "
@@ -328,11 +329,11 @@ main = do
         Run benches mSavePath fws -> do
             let idsFiltered = if null benches
                     then benchmarks
-                    else filter ((`elem` benches) . bgId) benchmarks
+                    else filter ((`elem` benches) . view bgId) benchmarks
 
             let toBenchmark = if null fws
                     then idsFiltered
-                    else map (\bg -> bg { bgBenches = filter ((`elem` fws) . benchDescription) (bgBenches bg) }) idsFiltered
+                    else idsFiltered & traverse . bgBenches %~ filter ((`elem` fws) . view benchDescription)
 
             putStrLn (T.unpack $ aboutToBenchDescription toBenchmark)
             putStrLn ""
@@ -351,8 +352,8 @@ main = do
             file <- B.readFile path
             let results = Bin.decode file :: [BenchGroup Report]
             mapM_ (\group -> do
-                let filename = T.unpack (bgId group) <> ".pdf"
-                putStrLn $ "plot: " <> T.unpack (bgDescription group) <> ": " <> filename
+                let filename = T.unpack (group ^. bgId) <> ".pdf"
+                putStrLn $ "plot: " <> T.unpack (group ^. bgDescription) <> ": " <> filename
                 renderableToFile
                     (def & fo_format .~ PDF)
                     filename

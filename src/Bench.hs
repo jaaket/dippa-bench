@@ -2,9 +2,13 @@
 {-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module Bench where
 
+import           Control.Lens                    (set)
+import           Control.Lens.Operators
+import           Control.Lens.TH
 import           Criterion
 import           Criterion.Types                 (Regression (..), Report (..),
                                                   SampleAnalysis (..))
@@ -18,32 +22,36 @@ import           Statistics.Resampling.Bootstrap (Estimate (..))
 
 
 data Bench a = Bench {
-      benchDescription :: T.Text
-    , benchData        :: [(Double, a)]
+      _benchDescription :: T.Text
+    , _benchData        :: [(Double, a)]
     }
     deriving (Functor, Generic, Show, Foldable, Traversable)
 
+makeLenses ''Bench
+
 data BenchGroup a = BenchGroup {
-      bgId          :: T.Text
-    , bgDescription :: T.Text
-    , bgBenches     :: [Bench a]
-    , bgXAxisName   :: T.Text
+      _bgId          :: T.Text
+    , _bgDescription :: T.Text
+    , _bgBenches     :: [Bench a]
+    , _bgXAxisName   :: T.Text
     }
     deriving (Functor, Generic, Show, Foldable, Traversable)
+
+makeLenses ''BenchGroup
 
 instance Bin.Binary a => Bin.Binary (Bench a)
 instance Bin.Binary a => Bin.Binary (BenchGroup a)
 
 runBenchGroup :: BenchGroup Benchmarkable -> IO (BenchGroup Report)
 runBenchGroup group = do
-    putStrLn $ "Benchmarking group: " <> T.unpack (bgDescription group) <>
-               " (" <> T.unpack (bgId group) <> ")"
-    results <- mapM describeAndRun (bgBenches group)
-    return $ group { bgBenches = results }
+    putStrLn $ "Benchmarking group: " <> T.unpack (group ^. bgDescription) <>
+               " (" <> T.unpack (group ^. bgId) <> ")"
+    results <- mapM describeAndRun (group ^. bgBenches)
+    return $ set bgBenches results group
 
 describeAndRun :: Bench Benchmarkable -> IO (Bench Report)
 describeAndRun bench = do
-    putStrLn $ "Running benchmark: " <> T.unpack (benchDescription bench)
+    putStrLn $ "Running benchmark: " <> T.unpack (bench ^. benchDescription)
     mapM benchmark' bench
 
 getOLS :: Report -> Double
