@@ -349,8 +349,7 @@ main = do
             when saveConfirmed (B.writeFile filename (Bin.encode results))
 
         Plot path -> do
-            file <- B.readFile path
-            let results = Bin.decode file :: [BenchGroup Report]
+            results <- loadAndSortByDescription path
             mapM_ (\group -> do
                 let filename = T.unpack (group ^. bgId) <> ".pdf"
                 putStrLn $ "plot: " <> T.unpack (group ^. bgDescription) <> ": " <> filename
@@ -361,6 +360,11 @@ main = do
                 ) results
 
         Latex path -> do
-            file <- B.readFile path
-            let results = Bin.decode file :: [BenchGroup Report]
+            results <- loadAndSortByDescription path
             mapM_ (putStrLn . T.unpack . exportTable) results
+
+loadAndSortByDescription :: FilePath -> IO [BenchGroup Report]
+loadAndSortByDescription path = do
+    file <- B.readFile path
+    let results = Bin.decode file :: [BenchGroup Report]
+    return (results & traverse . bgBenches %~ sortBy (compare `on` view benchDescription))

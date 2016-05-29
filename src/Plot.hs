@@ -6,8 +6,6 @@ import Control.Lens
 import           Criterion.Types                        (Report (..))
 import           Control.Arrow                          (second)
 import qualified Control.Monad.State                    as State
-import           Data.Function                          (on)
-import           Data.List                              (sortBy)
 import qualified Data.Text                              as T
 import qualified Data.Text.Lazy                         as LT
 import           Data.Text.Lazy.Builder                 (toLazyText)
@@ -46,9 +44,7 @@ plotBench bench = do
 
 plotBenchGroup group = toRenderable layout
   where
-    sortedBenches = sortBy (compare `on` view benchDescription) (group ^. bgBenches)
-
-    plots = State.evalState (mapM plotBench sortedBenches) (newCycle styles)
+    plots = State.evalState (mapM plotBench (group ^. bgBenches)) (newCycle styles)
 
     xAxisName = T.unpack (group ^. bgXAxisName)
 
