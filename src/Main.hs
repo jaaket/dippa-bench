@@ -9,12 +9,16 @@ module Main where
 
 import           Control.Arrow                          ((&&&))
 import           Control.Exception                      (bracket)
-import           Control.Lens                           (toListOf, view, (%~),
-                                                         (&), (.~), (^.), (^..))
+import           Control.Lens                           (alongside, to,
+                                                         toListOf, view, (%~),
+                                                         (&), (.~), (^.), (^..),
+                                                         _2)
 import           Control.Monad                          (when)
 import           Control.Monad.Par.Class                (NFData)
 import           Criterion
-import           Criterion.Types                        (Report)
+import           Criterion.Types                        (Regression (..),
+                                                         Report (..),
+                                                         SampleAnalysis (..))
 import qualified Data.Binary                            as Bin
 import qualified Data.ByteString.Lazy                   as B
 import           Data.Default                           (def)
@@ -28,6 +32,7 @@ import           Graphics.Rendering.Chart.Backend.Cairo (FileFormat (..),
                                                          fo_format,
                                                          renderableToFile)
 import qualified Options.Generic                        as Opts
+import           Statistics.Resampling.Bootstrap        (Estimate (..))
 import           System.Directory                       (doesFileExist)
 import           System.IO                              (BufferMode (..),
                                                          hGetBuffering,
@@ -249,6 +254,7 @@ data Options =
         }
     | Plot FilePath
     | Latex FilePath
+    | RSquared FilePath
     deriving (Generic, Show)
 
 instance Opts.ParseRecord Options
@@ -362,6 +368,33 @@ main = do
         Latex path -> do
             results <- loadAndSortByDescription path
             mapM_ (putStrLn . T.unpack . exportTable) results
+
+        RSquared path -> do
+            results <- loadAndSortByDescription path
+            let qualities = concatMap qualityReport results
+            case filter (not . all (>= 0.99) . qRSquared) qualities of
+                [] -> putStrLn "All R^2 are over 0.99"
+                qs -> do
+                    putStrLn "NOT all R^2 are over 0.99:"
+                    mapM_ (\q -> print $ qGroupDescription q <> "/" <> qBenchDescription q) qs
+
+qualityReport :: BenchGroup Report -> [Quality]
+qualityReport group = map buildQuality (group ^. bgBenches)
+  where
+    buildQuality :: Bench Report -> Quality
+    buildQuality bench = Quality {
+          qBenchDescription = bench ^. benchDescription
+        , qGroupDescription = group ^. bgDescription
+        , qRSquared = bench ^.. benchData . traverse . _2 . to reportAnalysis .
+                                to anRegress . to head . to regRSquare .
+                                to estPoint
+        }
+
+data Quality = Quality {
+      qBenchDescription :: T.Text
+    , qGroupDescription :: T.Text
+    , qRSquared         :: [Double]
+    } deriving Show
 
 loadAndSortByDescription :: FilePath -> IO [BenchGroup Report]
 loadAndSortByDescription path = do
