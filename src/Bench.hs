@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
 module Bench where
@@ -13,10 +14,13 @@ import           Criterion
 import           Criterion.Types                 (Regression (..), Report (..),
                                                   SampleAnalysis (..))
 import qualified Data.Binary                     as Bin
+import qualified Data.ByteString.Lazy            as B
+import           Data.Csv
 import qualified Data.Map.Lazy                   as Map
 import           Data.Maybe                      (fromJust)
 import           Data.Monoid                     ((<>))
 import qualified Data.Text                       as T
+import qualified Data.Text.Encoding              as T
 import           GHC.Generics                    (Generic)
 import           Statistics.Resampling.Bootstrap (Estimate (..))
 
@@ -68,3 +72,28 @@ getRSquared = estPoint . regRSquare . head . anRegress . reportAnalysis
 
 getMean :: Report -> Double
 getMean = estPoint . anMean . reportAnalysis
+
+getHeader :: BenchGroup a -> [T.Text]
+getHeader group = ["framework", group ^. bgXAxisName, "time"]
+
+getMeasurements :: Bench a -> [Measurement a]
+getMeasurements bench =
+    map (\(x, y) -> Measurement (bench ^. benchDescription) x y)
+        (bench ^. benchData)
+
+data Measurement a = Measurement {
+      _mLabel  :: T.Text
+    , _mXValue :: Double
+    , _mYValue :: a
+    }
+    deriving (Functor, Generic, Show)
+
+makeLenses ''Measurement
+
+instance ToField a => ToRecord (Measurement a)
+
+toCsv :: ToField a => BenchGroup a -> B.ByteString
+toCsv group =
+       B.intercalate "," (map (B.fromStrict . T.encodeUtf8) (getHeader group))
+    <> "\n"
+    <> encode (concatMap getMeasurements (group ^. bgBenches))

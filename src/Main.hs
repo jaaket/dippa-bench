@@ -9,10 +9,9 @@ module Main where
 
 import           Control.Arrow                          ((&&&))
 import           Control.Exception                      (bracket)
-import           Control.Lens                           (alongside, to,
-                                                         toListOf, view, (%~),
-                                                         (&), (.~), (^.), (^..),
-                                                         _2)
+import           Control.Lens                           (to, toListOf, view,
+                                                         (%~), (&), (.~), (^.),
+                                                         (^..), _2)
 import           Control.Monad                          (when)
 import           Control.Monad.Par.Class                (NFData)
 import           Criterion
@@ -255,6 +254,7 @@ data Options =
     | Plot FilePath
     | Latex FilePath
     | RSquared FilePath
+    | Csv FilePath
     deriving (Generic, Show)
 
 instance Opts.ParseRecord Options
@@ -377,6 +377,16 @@ main = do
                 qs -> do
                     putStrLn "NOT all R^2 are over 0.99:"
                     mapM_ (\q -> print $ qGroupDescription q <> "/" <> qBenchDescription q) qs
+
+        Csv path -> do
+            results <- loadAndSortByDescription path
+            mapM_ (\group -> do
+                let filename = T.unpack (group ^. bgId) <> ".csv"
+                putStrLn $ "export csv: " <> T.unpack (group ^. bgDescription) <> ": " <> filename
+                B.writeFile filename (toCsv (fmap getOLS group))
+                ) results
+
+
 
 qualityReport :: BenchGroup Report -> [Quality]
 qualityReport group = map buildQuality (group ^. bgBenches)

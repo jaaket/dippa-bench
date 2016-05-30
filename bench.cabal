@@ -83,3 +83,4 @@ executable bench
                      , HaTeX
                      , text-format
                      , template-haskell
+                     , cassava
