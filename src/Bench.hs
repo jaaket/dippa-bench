@@ -52,10 +52,19 @@ runBenchGroup group = do
 describeAndRun :: Bench Benchmarkable -> IO (Bench Report)
 describeAndRun bench = do
     putStrLn $ "Running benchmark: " <> T.unpack (bench ^. benchDescription)
-    mapM benchmark' bench
+    mapM benchAndRetry bench
+  where
+    benchAndRetry singleBench = do
+        result <- benchmark' singleBench
+        if getRSquared result < 0.99
+            then putStrLn "R^2 < 0.99 => RETRY!" >> benchAndRetry singleBench
+            else return result
 
 getOLS :: Report -> Double
 getOLS = estPoint . fromJust . Map.lookup "iters" . regCoeffs . head . anRegress . reportAnalysis
+
+getRSquared :: Report -> Double
+getRSquared = estPoint . regRSquare . head . anRegress . reportAnalysis
 
 getMean :: Report -> Double
 getMean = estPoint . anMean . reportAnalysis
