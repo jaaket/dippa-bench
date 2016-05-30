@@ -44,7 +44,7 @@ resultsToLatex group =
     rowToLatex (hd:tl) = foldr1 (&) $
         fromString (show hd) : map (fromString . T.unpack . LT.toStrict . T.toLazyText . Format.prec 3) tl
 
-    rows = transpose (xValues : map (map snd . view benchData . fmap getMean) (group ^. bgBenches))
+    rows = transpose (xValues : map (map snd . view benchData . fmap getOLS) (group ^. bgBenches))
 
     xValues = fmap fst $ group ^?! bgBenches . ix 0 . benchData
 
