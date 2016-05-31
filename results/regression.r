@@ -17,12 +17,13 @@ params <- data.frame(framework = rep(c("freer", "monad-classes", "mtl"), 22),
                      benchmark = rep(benchmarks, each = 3),
                      degree = rep(c(1, 1, 1), 22))
 
-# params[params$framework == "mtl" & params$benchmark == "exc",]
+params$degree[params$benchmark == "ras" & params$framework == "mtl"] <- 2
+params$degree[params$benchmark == "ras" & params$framework == "monad-classes"] <- 2
+params$degree[params$benchmark == "rbs" & params$framework == "mtl"] <- 2
+params$degree[params$benchmark == "rbs" & params$framework == "monad-classes"] <- 2
 
 ww <- read.csv("ww.csv")
 names(ww)[names(ww) == "X..of.iterations"] <- "n"
-
-ww <- transform(ww, n = log10(n), time = log10(time))
 
 p <- qplot(n, time, data = ww, col = framework)
 
@@ -36,9 +37,9 @@ p <- qplot(n, time, data = ww, col = framework)
 
 
 by(params, 1:nrow(params), function(row) {
-  fit <- lm(time ~ n, ww, subset = framework == row$framework)
+  fit <- lm(time ~ poly(n, row$degree), ww, subset = framework == row$framework)
   predicted <- data.frame(n = seq(min(ww$n), max(ww$n), length.out = 100), framework = row$framework)
   predicted$time <- predict(fit, predicted)
   p <<- p + geom_line(data=predicted, aes(x = n, y = time))
-  print(fit$coefficients)
 })
+
