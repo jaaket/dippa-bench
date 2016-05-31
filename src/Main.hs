@@ -372,6 +372,7 @@ main = do
         RSquared path -> do
             results <- loadAndSortByDescription path
             let qualities = concatMap qualityReport results
+            putStrLn $ "Worst R^2 value: " <> show (minimum (concatMap qRSquared qualities))
             case filter (not . all (>= 0.99) . qRSquared) qualities of
                 [] -> putStrLn "All R^2 are over 0.99"
                 qs -> do
