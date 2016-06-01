@@ -1,4 +1,7 @@
 library("ggplot2")
+library("grid")
+
+source("multiplot.r")
 
 frameworks = c("freer", "monad-classes", "mtl")
 
@@ -33,13 +36,25 @@ results <- sapply(benchmarks, function(bname) {
   bdata <- read.csv(paste(bname, "csv", sep = "."))
   names(bdata)[2] <- "n"
 
-  p <- qplot(n, time, data = bdata, col = framework)
+  p <- ggplot() +
+      geom_point(data = bdata, mapping = aes(x = n, y = time, col = framework, shape = framework), size = 5, stroke = 1.5) +
+      # scale_shape_discrete(solid = F) +
+      scale_shape_manual(values = c(4, 3, 1))
 
   fits <- sapply(frameworks, function(fw) {
     d <- params$degree[params$benchmark == bname & params$framework == fw]
     fit <- lm(time ~ poly(n, d), bdata, subset = framework == fw)
+
+    predicted <- data.frame(n = seq(min(bdata$n), max(bdata$n), length.out = 100), framework = fw)
+    predicted$time <- predict(fit, predicted)
+    p <<- p + geom_line(data=predicted, aes(x = n, y = time, col = framework), size = 1)
+
     list(fit = fit)
   }, simplify = FALSE, USE.NAMES = TRUE)
+
+  pdf(paste(bname, "pdf", sep = "."))
+  print(p)
+  dev.off()
 
   list(benchmark = bname, plot = p, fits = fits)
 }, simplify = FALSE, USE.NAMES = TRUE)
