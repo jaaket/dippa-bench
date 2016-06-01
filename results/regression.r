@@ -9,7 +9,7 @@ benchmarks <- c("exc","cd","cdr","rt",
                 "ws","wr","ww","we",
                 "es","er","ew","ee")
 
-params <- expand.grid(framework = frameworks, benchmark = benchmarks, degree = 1)
+params <- expand.grid(benchmark = benchmarks, framework = frameworks, degree = 1)
 
 set_degree <- function(params, benchmark, framework, degree) {
   params$degree[params$benchmark == benchmark & params$framework == framework] <- degree
@@ -44,12 +44,16 @@ results <- sapply(benchmarks, function(bname) {
   list(benchmark = bname, plot = p, fits = fits)
 }, simplify = FALSE, USE.NAMES = TRUE)
 
-rsquareds <- expand.grid(benchmark = benchmarks, framework = frameworks)
+results.final <- expand.grid(benchmark = benchmarks, framework = frameworks)
 
-rsquareds$r2 <- apply(rsquareds, 1, function(x) {
-  benchmark <- x[[1]]
-  framework <- x[[2]]
-  summary(results[[benchmark]]$fits[[framework]]$fit)$r.squared
-})
+results.final[c("r2", "coeff", "degree")] <- t(mapply(function(benchmark, framework, degree) {
+  fit <- results[[benchmark]]$fits[[framework]]$fit
+  r2 <- summary(fit)$r.squared
+  coeff <- tail(unname(coef(fit)), n = 1)
+  c(r2, coeff, degree)
+}, params$benchmark, params$framework, params$degree))
 
-print(subset(rsquareds, r2 < 0.99))
+print(results.final[order(results.final$benchmark),])
+print(subset(results.final, r2 < 0.99))
+
+# Normalize leading coefficients?
