@@ -1,11 +1,6 @@
 library("ggplot2")
 
-# For each benchmark:
-#  For each framework:
-#    * Have a guess of polynomial degree
-#    * Fit polynomial
-#    * Print R^2
-#  Plot data points + fitted curve
+frameworks = c("freer", "monad-classes", "mtl")
 
 benchmarks <- c("exc","cd","cdr","rt",
                 "ras", "rbs",
@@ -13,33 +8,48 @@ benchmarks <- c("exc","cd","cdr","rt",
                 "rs","rr","rw","re",
                 "ws","wr","ww","we",
                 "es","er","ew","ee")
-params <- data.frame(framework = rep(c("freer", "monad-classes", "mtl"), 22),
-                     benchmark = rep(benchmarks, each = 3),
-                     degree = rep(c(1, 1, 1), 22))
 
-params$degree[params$benchmark == "ras" & params$framework == "mtl"] <- 2
-params$degree[params$benchmark == "ras" & params$framework == "monad-classes"] <- 2
-params$degree[params$benchmark == "rbs" & params$framework == "mtl"] <- 2
-params$degree[params$benchmark == "rbs" & params$framework == "monad-classes"] <- 2
+params <- expand.grid(framework = frameworks, benchmark = benchmarks, degree = 1)
 
-ww <- read.csv("ww.csv")
-names(ww)[names(ww) == "X..of.iterations"] <- "n"
+set_degree <- function(params, benchmark, framework, degree) {
+  params$degree[params$benchmark == benchmark & params$framework == framework] <- degree
+  params
+}
 
-p <- qplot(n, time, data = ww, col = framework)
+params[] <- set_degree(params, "ras", "mtl", 2)
+params[] <- set_degree(params, "ras", "monad-classes", 2)
+params[] <- set_degree(params, "rbs", "mtl", 2)
+params[] <- set_degree(params, "rbs", "monad-classes", 2)
+params[] <- set_degree(params, "rr", "freer", 2)
+params[] <- set_degree(params, "rw", "freer", 2)
+params[] <- set_degree(params, "wr", "freer", 2)
+params[] <- set_degree(params, "ww", "mtl", 2)
+params[] <- set_degree(params, "ww", "monad-classes", 2)
 
-# fit <- lm(time ~ n, ww, subset = framework == "mtl")
-# predicted <- data.frame(n = seq(min(ww$n), max(ww$n), length.out = 100), framework = "mtl")
-# predicted$time <- predict(fit, predicted)
-# p <- p + geom_line(data=predicted, aes(x = n, y = time))
+plots <- data.frame(benchmark = benchmarks, plot = NA)
+fits <- subset(params, select = c(benchmark, framework))
 
-# params = data.frame(framework = c("freer", "monad-classes", "mtl"),
-#                     degree = c(1, 2, 2))
+results <- sapply(benchmarks, function(bname) {
+  bdata <- read.csv(paste(bname, "csv", sep = "."))
+  names(bdata)[2] <- "n"
 
+  p <- qplot(n, time, data = bdata, col = framework)
 
-by(params, 1:nrow(params), function(row) {
-  fit <- lm(time ~ poly(n, row$degree), ww, subset = framework == row$framework)
-  predicted <- data.frame(n = seq(min(ww$n), max(ww$n), length.out = 100), framework = row$framework)
-  predicted$time <- predict(fit, predicted)
-  p <<- p + geom_line(data=predicted, aes(x = n, y = time))
+  fits <- sapply(frameworks, function(fw) {
+    d <- params$degree[params$benchmark == bname & params$framework == fw]
+    fit <- lm(time ~ poly(n, d), bdata, subset = framework == fw)
+    list(fit = fit)
+  }, simplify = FALSE, USE.NAMES = TRUE)
+
+  list(benchmark = bname, plot = p, fits = fits)
+}, simplify = FALSE, USE.NAMES = TRUE)
+
+rsquareds <- expand.grid(benchmark = benchmarks, framework = frameworks)
+
+rsquareds$r2 <- apply(rsquareds, 1, function(x) {
+  benchmark <- x[[1]]
+  framework <- x[[2]]
+  summary(results[[benchmark]]$fits[[framework]]$fit)$r.squared
 })
 
+print(subset(rsquareds, r2 < 0.99))
