@@ -1,15 +1,20 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Latex where
 
-import           Control.Lens           (ix, view, (^.), (^?!))
-import           Criterion.Types        (Report (..))
-import           Data.List              (intersperse, transpose)
-import qualified Data.Text              as T
-import qualified Data.Text.Format       as Format
-import qualified Data.Text.Lazy         as LT
-import qualified Data.Text.Lazy.Builder as T
+import           Control.Lens                (ix, view, (^.), (^?!))
+import           Criterion.Types             (Report (..))
+import           Data.List                   (intercalate, intersperse,
+                                              transpose)
+import           Data.List.Split             (chunksOf)
+import qualified Data.Text                   as T
+import qualified Data.Text.Format            as Format
+import qualified Data.Text.Lazy              as LT
+import qualified Data.Text.Lazy.Builder      as T
 import           Text.LaTeX
 import           Text.LaTeX.Base.Class
 import           Text.LaTeX.Base.Syntax
+import           Text.LaTeX.Packages.AMSMath
 
 import           Bench
 import           Regression
@@ -53,26 +58,44 @@ exportRegressions :: [Regression] -> T.Text
 exportRegressions = render . regressionsToLatex
 
 regressionsToLatex :: [Regression] -> LaTeX
-regressionsToLatex regressions =
-    tableEnv $
-        centering
-    -- <> tableCaption
-    -- <> tableLabel
-     <> tabular Nothing tableSpec table
+regressionsToLatex regressions = longtable tableSpec table
   where
-    tableSpec = [CenterColumn, CenterColumn, CenterColumn]
+    tableSpec = replicate 3 CenterColumn
 
-    table = toprule <> newline <> header <> lnbk <> midrule <> newline <> body <> lnbk <> bottomrule
+    table =
+           tableCaption <> tableLabel <> lnbk
+        <> toprule <> newline
+        <> header <> lnbk <> endfirsthead
+        <> continuationHeader <> lnbk <> midrule <> endhead
+        <> midrule <> newline
+        <> body <> lnbk
+        <> bottomrule
+
+    tableCaption = caption (fromString "Results of regression")
+
+    tableLabel = label (fromString "table:regression")
 
     header = fromString "Benchmark" & fromString "Framework" & fromString "Leading term"
 
-    body = foldr1 (<>) (intersperse lnbk (map regToLatex regressions))
+    continuationHeader = multicolumn 3 [CenterColumn]
+        (textbf $
+               tablename
+            <> raw "\\ "
+            <> thetable
+            <> fromString " -- continued from previous page") <> lnbk <> header
+
+    body = foldr1 (<>) (intercalate [midrule, newline]
+        (chunksOf 6 (intersperse lnbk (map regToLatex regressions))))
 
     regToLatex :: Regression -> LaTeX
     regToLatex reg =
           fromString (T.unpack (regBench reg))
         & fromString (T.unpack (regFw reg))
-        & realToLatexWithPrec 2 (regCoeff reg)
+        & math (realToLatexWithPrec 2 (regCoeff reg) <> degreeToLatex (regDegree reg))
+
+    degreeToLatex :: Int -> LaTeX
+    degreeToLatex 1 = fromString "n"
+    degreeToLatex n = fromString "n" ^: fromString (show n)
 
 realToLatexWithPrec :: Real a => Int -> a -> LaTeX
 realToLatexWithPrec prec =
@@ -92,3 +115,18 @@ centering = fromLaTeX (TeXCommS "centering")
 
 tableEnv :: LaTeXC l => l -> l
 tableEnv = liftL (TeXEnv "table" [OptArg (fromString "H")])
+
+longtable :: LaTeXC l => [TableSpec] -> l -> l
+longtable ts = liftL (TeXEnv "longtable" [FixArg $ TeXRaw $ renderAppend ts])
+
+endfirsthead :: LaTeXC l => l
+endfirsthead = fromLaTeX (TeXCommS "endfirsthead") <> raw "\n"
+
+endhead :: LaTeXC l => l
+endhead = fromLaTeX (TeXCommS "endhead") <> raw "\n"
+
+tablename :: LaTeXC l => l
+tablename = fromLaTeX (TeXCommS "tablename")
+
+thetable :: LaTeXC l => l
+thetable = comm0 "thetable"

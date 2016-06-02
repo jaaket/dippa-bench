@@ -68,7 +68,9 @@ results.final[c("r2", "coeff", "degree")] <- t(mapply(function(benchmark, framew
   c(r2, coeff, degree)
 }, params$benchmark, params$framework, params$degree))
 
-print(results.final[order(results.final$benchmark),])
+results.final <- results.final[order(results.final$benchmark),]
+
+print(results.final)
 print(subset(results.final, r2 < 0.99))
 
 # Export CSV

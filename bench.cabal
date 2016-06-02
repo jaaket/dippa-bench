@@ -86,3 +86,4 @@ executable bench
                      , template-haskell
                      , cassava
                      , vector
+                     , split
