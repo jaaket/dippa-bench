@@ -1,8 +1,6 @@
 library("ggplot2")
 library("grid")
 
-source("multiplot.r")
-
 frameworks = c("freer", "monad-classes", "mtl")
 
 benchmarks <- c("exc","cd","cdr","rt",
