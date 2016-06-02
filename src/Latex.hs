@@ -4,7 +4,7 @@ module Latex where
 
 import           Control.Lens                (ix, view, (^.), (^?!))
 import           Criterion.Types             (Report (..))
-import           Data.List                   (intercalate, intersperse,
+import           Data.List                   (find, intercalate, intersperse,
                                               transpose)
 import           Data.List.Split             (chunksOf)
 import qualified Data.Text                   as T
@@ -54,11 +54,11 @@ resultsToLatex group =
 
     xValues = fmap fst $ group ^?! bgBenches . ix 0 . benchData
 
-exportRegressions :: [Regression] -> T.Text
-exportRegressions = render . regressionsToLatex
+exportRegressions :: [BenchGroup a] -> [Regression] -> T.Text
+exportRegressions benches = render . regressionsToLatex benches
 
-regressionsToLatex :: [Regression] -> LaTeX
-regressionsToLatex regressions = longtable tableSpec table
+regressionsToLatex :: [BenchGroup a] -> [Regression] -> LaTeX
+regressionsToLatex benches regressions = longtable tableSpec table
   where
     tableSpec = replicate 3 CenterColumn
 
@@ -89,13 +89,18 @@ regressionsToLatex regressions = longtable tableSpec table
 
     regToLatex :: Regression -> LaTeX
     regToLatex reg =
-          fromString (T.unpack (regBench reg))
+          fromString (T.unpack (findDescription benches reg))
         & fromString (T.unpack (regFw reg))
         & math (realToLatexWithPrec 2 (regCoeff reg) <> degreeToLatex (regDegree reg))
 
     degreeToLatex :: Int -> LaTeX
     degreeToLatex 1 = fromString "n"
     degreeToLatex n = fromString "n" ^: fromString (show n)
+
+    findDescription :: [BenchGroup a] -> Regression -> T.Text
+    findDescription benches reg =
+        let Just group = find ((== regBench reg) . view bgId) benches
+         in group ^. bgDescription
 
 realToLatexWithPrec :: Real a => Int -> a -> LaTeX
 realToLatexWithPrec prec =

@@ -393,7 +393,7 @@ main = do
         Regressions path -> do
             csv <- B.readFile path
             let Right regressions = fmap V.toList (Csv.decode Csv.HasHeader csv)
-            let output = exportRegressions regressions
+            let output = exportRegressions benchmarks regressions
             putStrLn (T.unpack output)
 
 qualityReport :: BenchGroup Report -> [Quality]
