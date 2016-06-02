@@ -12,6 +12,7 @@ import           Text.LaTeX.Base.Class
 import           Text.LaTeX.Base.Syntax
 
 import           Bench
+import           Regression
 
 
 exportTable :: BenchGroup Report -> T.Text
@@ -33,7 +34,7 @@ resultsToLatex group =
 
     tableCaption = caption (fromString (T.unpack (group ^. bgDescription)))
 
-    table = toprule <> header <> lnbk <> midrule <> body <> lnbk <> bottomrule
+    table = toprule <> newline <> header <> lnbk <> midrule <> newline <> body <> lnbk <> bottomrule
 
     header = fromString (T.unpack $ group ^. bgXAxisName)
            & foldr1 (&) (map (fromString . T.unpack . view benchDescription) (group ^. bgBenches))
@@ -42,11 +43,40 @@ resultsToLatex group =
 
     rowToLatex :: [Double] -> LaTeX
     rowToLatex (hd:tl) = foldr1 (&) $
-        fromString (show hd) : map (fromString . T.unpack . LT.toStrict . T.toLazyText . Format.prec 3) tl
+        fromString (show hd) : map (realToLatexWithPrec 3) tl
 
     rows = transpose (xValues : map (map snd . view benchData . fmap getOLS) (group ^. bgBenches))
 
     xValues = fmap fst $ group ^?! bgBenches . ix 0 . benchData
+
+exportRegressions :: [Regression] -> T.Text
+exportRegressions = render . regressionsToLatex
+
+regressionsToLatex :: [Regression] -> LaTeX
+regressionsToLatex regressions =
+    tableEnv $
+        centering
+    -- <> tableCaption
+    -- <> tableLabel
+     <> tabular Nothing tableSpec table
+  where
+    tableSpec = [CenterColumn, CenterColumn, CenterColumn]
+
+    table = toprule <> newline <> header <> lnbk <> midrule <> newline <> body <> lnbk <> bottomrule
+
+    header = fromString "Benchmark" & fromString "Framework" & fromString "Leading term"
+
+    body = foldr1 (<>) (intersperse lnbk (map regToLatex regressions))
+
+    regToLatex :: Regression -> LaTeX
+    regToLatex reg =
+          fromString (T.unpack (regBench reg))
+        & fromString (T.unpack (regFw reg))
+        & realToLatexWithPrec 2 (regCoeff reg)
+
+realToLatexWithPrec :: Real a => Int -> a -> LaTeX
+realToLatexWithPrec prec =
+    fromString . T.unpack . LT.toStrict . T.toLazyText . Format.prec prec
 
 toprule :: LaTeXC l => l
 toprule = fromLaTeX (TeXCommS "toprule")

@@ -55,6 +55,7 @@ executable bench
                      , Mtl.StateWriter
                      , Mtl.Writer
                      , Plot
+                     , Regression
   default-language:    Haskell2010
   ghc-options:         -W -O2 -threaded
   build-depends:       base >= 4.7 && < 5
@@ -84,3 +85,4 @@ executable bench
                      , text-format
                      , template-haskell
                      , cassava
+                     , vector

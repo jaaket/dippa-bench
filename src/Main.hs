@@ -20,12 +20,14 @@ import           Criterion.Types                        (Regression (..),
                                                          SampleAnalysis (..))
 import qualified Data.Binary                            as Bin
 import qualified Data.ByteString.Lazy                   as B
+import qualified Data.Csv                               as Csv
 import           Data.Default                           (def)
 import           Data.Function                          (on)
 import           Data.List                              (nub, sort, sortBy)
 import           Data.Maybe                             (fromMaybe)
 import           Data.Monoid                            ((<>))
 import qualified Data.Text                              as T
+import qualified Data.Vector                            as V
 import           GHC.Generics                           (Generic)
 import           Graphics.Rendering.Chart.Backend.Cairo (FileFormat (..),
                                                          fo_format,
@@ -255,6 +257,7 @@ data Options =
     | Latex FilePath
     | RSquared FilePath
     | Csv FilePath
+    | Regressions FilePath
     deriving (Generic, Show)
 
 instance Opts.ParseRecord Options
@@ -387,7 +390,11 @@ main = do
                 B.writeFile filename (toCsv (fmap getOLS group))
                 ) results
 
-
+        Regressions path -> do
+            csv <- B.readFile path
+            let Right regressions = fmap V.toList (Csv.decode Csv.HasHeader csv)
+            let output = exportRegressions regressions
+            putStrLn (T.unpack output)
 
 qualityReport :: BenchGroup Report -> [Quality]
 qualityReport group = map buildQuality (group ^. bgBenches)

@@ -71,4 +71,7 @@ results.final[c("r2", "coeff", "degree")] <- t(mapply(function(benchmark, framew
 print(results.final[order(results.final$benchmark),])
 print(subset(results.final, r2 < 0.99))
 
+# Export CSV
+write.table(results.final, "regression.csv", sep = ",", row.names = F)
+
 # Normalize leading coefficients?
