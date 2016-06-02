@@ -1,5 +1,5 @@
 library("ggplot2")
-library("grid")
+library("dplyr")
 
 frameworks = c("freer", "monad-classes", "mtl")
 
@@ -47,20 +47,24 @@ results <- sapply(benchmarks, function(bname) {
     predicted$time <- predict(fit, predicted)
     p <<- p + geom_line(data=predicted, aes(x = n, y = time, col = framework), size = 1)
 
-    list(fit = fit)
+    fit
+  }, simplify = FALSE, USE.NAMES = TRUE)
+
+  linear.fits <- sapply(frameworks, function(fw) {
+    lm(time ~ n, bdata, subset = framework == fw)
   }, simplify = FALSE, USE.NAMES = TRUE)
 
   pdf(paste(bname, "pdf", sep = "."))
   print(p)
   dev.off()
 
-  list(benchmark = bname, plot = p, fits = fits)
+  list(benchmark = bname, plot = p, fits = fits, linear.fits = linear.fits)
 }, simplify = FALSE, USE.NAMES = TRUE)
 
 results.final <- expand.grid(benchmark = benchmarks, framework = frameworks)
 
 results.final[c("r2", "coeff", "degree")] <- t(mapply(function(benchmark, framework, degree) {
-  fit <- results[[benchmark]]$fits[[framework]]$fit
+  fit <- results[[benchmark]]$fits[[framework]]
   r2 <- summary(fit)$r.squared
   coeff <- tail(unname(coef(fit)), n = 1)
   c(r2, coeff, degree)
@@ -74,4 +78,13 @@ print(subset(results.final, r2 < 0.99))
 # Export CSV
 write.table(results.final, "regression.csv", sep = ",", row.names = F)
 
-# Normalize leading coefficients?
+# R^2 changes from linear to quadratic
+r2.delta <- expand.grid(benchmark = benchmarks, framework = frameworks)
+r2.delta[c("linear", "quadr", "delta")] <- t(mapply(function(benchmark, framework) {
+  linear <- summary(results[[benchmark]]$linear.fits[[framework]])$r.squared
+  quadr <- summary(results[[benchmark]]$fits[[framework]])$r.squared
+  delta <- quadr - linear
+  c(linear, quadr, delta)
+}, r2.delta$benchmark, r2.delta$framework))
+
+print(filter(r2.delta, delta > 0.0001))
