@@ -75,14 +75,16 @@ regressionsToLatex benches regressions = longtable tableSpec table
 
     tableLabel = label (fromString "table:regression")
 
-    header = fromString "Benchmark" & fromString "Framework" & fromString "Leading term"
+    header = textbf (fromString "Benchmark")
+           & textbf (fromString "Framework")
+           & textbf (fromString "Leading term")
 
     continuationHeader = multicolumn 3 [CenterColumn]
-        (textbf $
+        (rmfamily <> (textbf $
                tablename
             <> raw "\\ "
             <> thetable
-            <> fromString " -- continued from previous page") <> lnbk <> header
+            <> fromString " -- continued from previous page")) <> lnbk <> toprule <> header
 
     body = foldr1 (<>) (intercalate [midrule, newline]
         (chunksOf 6 (intersperse lnbk (map regToLatex regressions))))
@@ -135,3 +137,6 @@ tablename = fromLaTeX (TeXCommS "tablename")
 
 thetable :: LaTeXC l => l
 thetable = comm0 "thetable"
+
+rmfamily :: LaTeXC l => l
+rmfamily = comm0 "rmfamily"
