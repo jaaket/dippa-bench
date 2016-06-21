@@ -7,7 +7,7 @@ import           Control.Monad.Classes.Run
 
 
 countdown :: Int -> Int
-countdown n = run $ evalStateStrict n go
+countdown = run . flip evalStateStrict go
   where
     go = do
         x <- get
