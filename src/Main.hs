@@ -24,6 +24,7 @@ import qualified Data.Csv                               as Csv
 import           Data.Default                           (def)
 import           Data.Function                          (on)
 import           Data.List                              (nub, sort, sortBy)
+import           Data.List.Split                        (splitOn)
 import           Data.Maybe                             (fromMaybe)
 import           Data.Monoid                            ((<>))
 import qualified Data.Text                              as T
@@ -254,9 +255,10 @@ data Options =
         , fw       :: [T.Text]
         }
     | Plot FilePath
-    | Latex FilePath
+    | Latex [FilePath]
     | RSquared FilePath
     | Csv FilePath
+    | Split FilePath
     | Regressions FilePath
     deriving (Generic, Show)
 
@@ -368,8 +370,8 @@ main = do
                     (plotBenchGroup group)
                 ) results
 
-        Latex path -> do
-            results <- loadAndSortByDescription path
+        Latex paths -> do
+            results <- concat <$> mapM loadAndSortByDescription paths
             mapM_ (putStrLn . T.unpack . exportTable) results
 
         RSquared path -> do
@@ -395,6 +397,18 @@ main = do
             let Right regressions = fmap V.toList (Csv.decode Csv.HasHeader csv)
             let output = exportRegressions benchmarks regressions
             putStrLn (T.unpack output)
+
+        Split path -> do
+            results <- loadAndSortByDescription path
+            let nameParts = splitOn ['.'] path
+            mapM_ (\group -> do
+                let newPath = concat (init nameParts)
+                           ++ "."
+                           ++ T.unpack (group ^. bgId)
+                           ++ "."
+                           ++ last nameParts
+                B.writeFile newPath (Bin.encode [group])
+                ) results
 
 qualityReport :: BenchGroup Report -> [Quality]
 qualityReport group = map buildQuality (group ^. bgBenches)
