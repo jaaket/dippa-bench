@@ -91,7 +91,7 @@ regressionsToLatex benches regressions = longtable tableSpec table
 
     regToLatex :: Regression -> LaTeX
     regToLatex reg =
-          fromString (T.unpack (findDescription benches reg))
+          textsc (fromString (T.unpack (findDescription benches reg)))
         & fromString (T.unpack (regFw reg))
         & math (realToLatexWithPrec 2 (regCoeff reg) <> degreeToLatex (regDegree reg))
 

@@ -89,7 +89,7 @@ benchmarks = [
 
     , BenchGroup {
         _bgId = "ras"
-      , _bgDescription = "Stack of readers above state"
+      , _bgDescription = "ReaderStackAboveState"
       , _bgBenches = (\n ks ->
           [
             Bench "freer" (map (\k -> (k, whnf (Freer.readersAboveState k) n)) ks)
@@ -101,7 +101,7 @@ benchmarks = [
 
     , BenchGroup {
           _bgId = "rbs"
-        , _bgDescription = "Stack of readers below state"
+        , _bgDescription = "ReaderStackBelowState"
         , _bgBenches = (\n ks ->
             [
               Bench "freer" (map (\k -> (k, whnf (Freer.readersBelowState k) n)) ks)
@@ -165,82 +165,82 @@ parseDeclaration (BenchDecl name desc magnitude fwsAndFuns) = BenchGroup {
 
 crossBenchDeclarations :: [BenchDecl]
 crossBenchDeclarations = [
-      BenchDecl "ss" "State above state" (10^6) [
+      BenchDecl "ss" "StateAboveState" (10^6) [
           ("freer", Freer.stateState)
         , ("monad-classes", Classes.stateState)
         , ("mtl", Mtl.stateState)
         ]
-    , BenchDecl "sr" "State above reader" (10^7) [
+    , BenchDecl "sr" "StateAboveReader" (10^7) [
           ("freer", Freer.stateReader)
         , ("monad-classes", Classes.stateReader)
         , ("mtl", Mtl.stateReader)
         ]
-    , BenchDecl "sw" "State above writer" (10^6) [
+    , BenchDecl "sw" "StateAboveWriter" (10^6) [
           ("freer", Freer.stateWriter)
         , ("monad-classes", Classes.stateWriter)
         , ("mtl", Mtl.stateWriter)
         ]
-    , BenchDecl "se" "State above exception" (10^7) [
+    , BenchDecl "se" "StateAboveException" (10^7) [
           ("freer", Freer.stateException)
         , ("monad-classes", Classes.stateException)
         , ("mtl", Mtl.stateException)
         ]
-    , BenchDecl "rs" "Reader above state" (10^7) [
+    , BenchDecl "rs" "ReaderAboveState" (10^7) [
           ("freer", Freer.readerState)
         , ("monad-classes", Classes.readerState)
         , ("mtl", Mtl.readerState)
         ]
-    , BenchDecl "rr" "Reader above reader" (10^3) [
+    , BenchDecl "rr" "ReaderAboveReader" (10^3) [
           ("freer", Freer.readerReader)
         , ("monad-classes", Classes.readerReader)
         , ("mtl", Mtl.readerReader)
         ]
-    , BenchDecl "rw" "Reader above writer" (10^3) [
+    , BenchDecl "rw" "ReaderAboveWriter" (10^3) [
           ("freer", Freer.readerWriter)
         , ("monad-classes", Classes.readerWriter)
         , ("mtl", Mtl.readerWriter)
         ]
-    , BenchDecl "re" "Reader above exception" (10^6) [
+    , BenchDecl "re" "ReaderAboveException" (10^6) [
           ("freer", Freer.readerException)
         , ("monad-classes", Classes.readerException)
         , ("mtl", Mtl.readerException)
         ]
-    , BenchDecl "ws" "Writer above state" (10^6) [
+    , BenchDecl "ws" "WriterAboveState" (10^6) [
           ("freer", Freer.writerState)
         , ("monad-classes", Classes.writerState)
         , ("mtl", Mtl.writerState)
         ]
-    , BenchDecl "wr" "Writer above reader" (10^3) [
+    , BenchDecl "wr" "WriterAboveReader" (10^3) [
           ("freer", Freer.writerReader)
         , ("monad-classes", Classes.writerReader)
         , ("mtl", Mtl.writerReader)
         ]
-    , BenchDecl "ww" "Writer above writer" (10^3) [
+    , BenchDecl "ww" "WriterAboveWriter" (10^3) [
           ("freer", Freer.writerWriter)
         , ("monad-classes", Classes.writerWriter)
         , ("mtl", Mtl.writerWriter)
         ]
-    , BenchDecl "we" "Writer above exception" (10^6) [
+    , BenchDecl "we" "WriterAboveException" (10^6) [
           ("freer", Freer.writerException)
         , ("monad-classes", Classes.writerException)
         , ("mtl", Mtl.writerException)
         ]
-    , BenchDecl "es" "Exception above state" (10^7) [
+    , BenchDecl "es" "ExceptionAboveState" (10^7) [
           ("freer", Freer.exceptionState)
         , ("monad-classes", Classes.exceptionState)
         , ("mtl", Mtl.exceptionState)
         ]
-    , BenchDecl "er" "Exception above reader" (10^6) [
+    , BenchDecl "er" "ExceptionAboveReader" (10^6) [
           ("freer", Freer.exceptionReader)
         , ("monad-classes", Classes.exceptionReader)
         , ("mtl", Mtl.exceptionReader)
         ]
-    , BenchDecl "ew" "Exception above writer" (10^6) [
+    , BenchDecl "ew" "ExceptionAboveWriter" (10^6) [
           ("freer", Freer.exceptionWriter)
         , ("monad-classes", Classes.exceptionWriter)
         , ("mtl", Mtl.exceptionWriter)
         ]
-    , BenchDecl "ee" "Exception above exception" (10^8) [
+    , BenchDecl "ee" "ExceptionAboveException" (10^8) [
           ("freer", Freer.exceptionException)
         , ("monad-classes", Classes.exceptionException)
         , ("mtl", Mtl.exceptionException)
