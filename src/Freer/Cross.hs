@@ -46,7 +46,7 @@ stateWriterInner :: (Member (State Int) r, Member (Writer (Sum Int)) r)
                  => Eff r Int
 stateWriterInner = do
     x <- get
-    tell (Sum (x :: Int))
+    tell (Sum x)
     if x == 0
         then return x
         else put (x - 1) >> stateWriterInner
@@ -60,7 +60,7 @@ stateExceptionInner = do
     x <- get
     if x == 0
         then throwError (ErrCode x)
-        else put (x - 1 :: Int) >> stateExceptionInner
+        else put (x - 1) >> stateExceptionInner
 
 stateException :: Int -> Either ErrCode Int
 stateException n = fmap snd $ run $ runError $ runState stateExceptionInner n
@@ -85,7 +85,7 @@ readerWriterInner :: (Member (Reader Int) r, Member (Writer (Sum Int)) r)
                   => Eff r Int
 readerWriterInner = do
     x <- ask
-    tell (Sum (x :: Int))
+    tell (Sum x)
     if x == 0
         then return x
         else local (subtract (1 :: Int)) readerWriterInner
@@ -97,7 +97,7 @@ readerExceptionInner :: (Member (Reader Int) r, Member (Exc ErrCode) r)
                      => Eff r Int
 readerExceptionInner = do
     x <- ask
-    if x == (0 :: Int)
+    if x == 0
         then throwError (ErrCode x)
         else local (subtract (1 :: Int)) readerExceptionInner
 
@@ -123,11 +123,8 @@ writerExceptionInner n = do
     throwError (ErrCode 0)
 
 writerException :: Int -> Either ErrCode Int
-writerException n = fst <$> helper
-  where
-    -- GHC needs help choosing monoid instance
-    helper :: Either ErrCode (Int, [Int])
-    helper = run $ runError $ runWriter $ writerExceptionInner n
+writerException n = fst <$>
+    (run $ runError $ runWriter $ writerExceptionInner n :: Either ErrCode (Int, [Int]))
 
 exceptionState :: Int -> Either ErrCode Int
 exceptionState n =
@@ -137,11 +134,8 @@ exceptionReader :: Int -> Either ErrCode Int
 exceptionReader n = run $ flip runReader n $ runError readerExceptionInner
 
 exceptionWriter :: Int -> Either ErrCode Int
-exceptionWriter n = fst helper
-  where
-    -- GHC needs help choosing monoid instance
-    helper :: (Either ErrCode Int, [Int])
-    helper = run $ runWriter $ runError $ writerExceptionInner n
+exceptionWriter n =
+    fst (run $ runWriter $ runError $ writerExceptionInner n :: (Either ErrCode Int, [Int]))
 
 exceptionInner :: Member (Exc ErrCode) r  => Int -> Eff r Int
 exceptionInner n = foldM f 1 (replicate n 1 ++ [0])

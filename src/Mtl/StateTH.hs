@@ -12,7 +12,7 @@ innerComputation :: MonadState Int m => Int -> m Int
 innerComputation n = foldM f 1 [1..n] where
     f acc x | x `mod` 5 == 0 = do
                             s <- get
-                            put $! (s + 1 :: Int)
+                            put $! (s + 1)
                             return $! max acc x
     f acc x = return $! max acc x
 

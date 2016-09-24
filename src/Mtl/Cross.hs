@@ -79,7 +79,7 @@ readerWriterInner = do
     tell (Sum x)
     if x == 0
         then return x
-        else local (subtract (1 :: Int)) readerWriterInner
+        else local (subtract 1) readerWriterInner
 
 readerWriter :: Int -> Int
 readerWriter n = getSum $ snd $ runWriter $ runReaderT readerWriterInner n
