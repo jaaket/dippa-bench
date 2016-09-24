@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Freer.StateTH where
+module Freer.RSABSTH where
 
 import           Control.Monad (foldM)
 import           Control.Monad.Freer

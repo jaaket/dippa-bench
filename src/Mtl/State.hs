@@ -1,13 +1,15 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TemplateHaskell  #-}
 
 module Mtl.State where
 
-import           Control.Monad.Reader
 import           Control.Monad.State.Strict
 
-import           Mtl.StateTH
 
-
-genReadersAboveState 10
-genReadersBelowState 10
+countdown :: Int -> Int
+countdown = evalState go
+  where
+    go = do
+        x <- get
+        if x == 0
+            then return x
+            else put (x - 1) >> go

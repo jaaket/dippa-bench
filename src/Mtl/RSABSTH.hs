@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Mtl.StateTH where
+module Mtl.RSABSTH where
 
 import           Control.Monad.Reader
 import           Control.Monad.State.Strict

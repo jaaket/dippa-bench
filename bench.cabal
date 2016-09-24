@@ -16,43 +16,28 @@ executable bench
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Bench
-                     , Classes.Countdown
+                     , Classes.State
                      , Classes.Cross
                      , Classes.Exception
                      , Classes.Reader
-                     , Classes.State
-                     , Classes.StateTH
-                     , Classes.StateWriter
+                     , Classes.RSABS
+                     , Classes.RSABSTH
                      , Classes.Writer
                      , Common.ErrCode
-                     , Common.NQueens
-                     , Effects.Countdown
-                     , Effects.NQueens
-                     , Extensible.Countdown
-                     , Extensible.Exception
-                     , Extensible.NQueens
-                     , Extensible.Reader
-                     , Extensible.State
-                     , Extensible.StateWriter
-                     , Extensible.Writer
-                     , Freer.Countdown
+                     , Freer.State
                      , Freer.Cross
                      , Freer.Exception
-                     , Freer.NQueens
                      , Freer.Reader
-                     , Freer.State
-                     , Freer.StateTH
-                     , Freer.StateWriter
+                     , Freer.RSABS
+                     , Freer.RSABSTH
                      , Freer.Writer
                      , Latex
-                     , Mtl.Countdown
+                     , Mtl.State
                      , Mtl.Cross
                      , Mtl.Exception
-                     , Mtl.NQueens
                      , Mtl.Reader
-                     , Mtl.State
-                     , Mtl.StateTH
-                     , Mtl.StateWriter
+                     , Mtl.RSABS
+                     , Mtl.RSABSTH
                      , Mtl.Writer
                      , Plot
                      , Regression

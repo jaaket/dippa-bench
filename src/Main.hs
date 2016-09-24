@@ -41,23 +41,23 @@ import           System.IO                              (BufferMode (..),
                                                          hSetBuffering, stdin)
 
 import           Bench
-import qualified Classes.Countdown                      as Classes
 import qualified Classes.Cross                          as Classes
 import qualified Classes.Exception                      as Classes
 import qualified Classes.Reader                         as Classes
+import qualified Classes.RSABS                          as Classes
 import qualified Classes.State                          as Classes
 import qualified Classes.Writer                         as Classes
-import qualified Freer.Countdown                        as Freer
 import qualified Freer.Cross                            as Freer
 import qualified Freer.Exception                        as Freer
 import qualified Freer.Reader                           as Freer
+import qualified Freer.RSABS                            as Freer
 import qualified Freer.State                            as Freer
 import qualified Freer.Writer                           as Freer
 import           Latex
-import qualified Mtl.Countdown                          as Mtl
 import qualified Mtl.Cross                              as Mtl
 import qualified Mtl.Exception                          as Mtl
 import qualified Mtl.Reader                             as Mtl
+import qualified Mtl.RSABS                              as Mtl
 import qualified Mtl.State                              as Mtl
 import qualified Mtl.Writer                             as Mtl
 import           Plot

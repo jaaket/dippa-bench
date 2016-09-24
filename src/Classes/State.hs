@@ -1,9 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TemplateHaskell  #-}
 
 module Classes.State where
 
-import           Classes.StateTH
+import           Control.Monad.Classes
+import           Control.Monad.Classes.Run
 
-genReadersAboveState 10
-genReadersBelowState 10
+
+countdown :: Int -> Int
+countdown = run . flip evalStateStrict go
+  where
+    go = do
+        x <- get
+        if x == 0
+            then return x
+            else put (x - 1) >> go

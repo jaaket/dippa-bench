@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Classes.StateTH where
+module Classes.RSABSTH where
 
 import Control.Monad (foldM)
 import           Control.Monad.Classes

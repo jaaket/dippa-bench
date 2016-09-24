@@ -1,10 +1,17 @@
+{-# LANGUAGE DataKinds        #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TemplateHaskell  #-}
 
 module Freer.State where
 
-import           Freer.StateTH
+import           Control.Monad.Freer
+import           Control.Monad.Freer.State
 
 
-genReadersAboveState 10
-genReadersBelowState 10
+countdown :: Int -> Int
+countdown = fst . run . runState go
+  where
+    go = do
+        x <- get
+        if x == 0
+            then return x
+            else put (x - 1) >> go
